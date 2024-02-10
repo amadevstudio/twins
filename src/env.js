@@ -43,7 +43,8 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_PROJECT_NAME: z.string(),
+    NEXT_PUBLIC_SUPPORT_EMAIL: z.string().email()
   },
 
   /**
@@ -51,6 +52,9 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    NEXT_PUBLIC_PROJECT_NAME: process.env.NEXT_PUBLIC_PROJECT_NAME,
+    NEXT_PUBLIC_SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
+
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
@@ -61,7 +65,7 @@ export const env = createEnv({
     NEXTAUTH_EMAIL_PASSWORD: process.env.NEXTAUTH_EMAIL_PASSWORD,
     NEXTAUTH_EMAIL_FROM: process.env.NEXTAUTH_EMAIL_FROM,
     NEXTAUTH_GOOGLE_ID: process.env.NEXTAUTH_GOOGLE_ID,
-    NEXTAUTH_GOOGLE_SECRET: process.env.NEXTAUTH_GOOGLE_SECRET
+    NEXTAUTH_GOOGLE_SECRET: process.env.NEXTAUTH_GOOGLE_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
