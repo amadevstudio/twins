@@ -6,6 +6,7 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
+import GoogleProvider from "next-auth/providers/google"
 
 import { env } from "@/env";
 import { db } from "@/server/db";
@@ -47,6 +48,9 @@ export const authOptions: NextAuthOptions = {
     }),
   },
   adapter: PrismaAdapter(db),
+  // pages: {
+  //   signIn: "/"
+  // },
   providers: [
     EmailProvider({
       server: {
@@ -59,6 +63,10 @@ export const authOptions: NextAuthOptions = {
         secure: true
       },
       from: env.NEXTAUTH_EMAIL_FROM
+    }),
+    GoogleProvider({
+      clientId: env.NEXTAUTH_GOOGLE_ID,
+      clientSecret: env.NEXTAUTH_GOOGLE_SECRET
     }),
     /**
      * ...add more providers here.
