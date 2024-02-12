@@ -1,9 +1,10 @@
 import { env } from "@/env";
 import { Button } from "@/components/ui/button-base";
-import { signIn } from "next-auth/react";
+import {signIn, signOut, useSession} from "next-auth/react";
 import Link from "next/link";
 
 export default function Header() {
+  const { data: sessionData } = useSession();
 
   return (
     <header className="container bg-white">
@@ -25,7 +26,12 @@ export default function Header() {
           <Link href={`mailto:${env.NEXT_PUBLIC_SUPPORT_EMAIL}`}>
             <Button>Написать в поддержку</Button>
           </Link>
-          <Button onClick={() => signIn()}>Войти</Button>
+          {!sessionData &&
+            <Button onClick={() => signIn()}>Войти</Button>
+          }
+          {!!sessionData &&
+              <Button onClick={() => signOut()}>Выйти</Button>
+          }
         </div>
       </nav>
     </header>

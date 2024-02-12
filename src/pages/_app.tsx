@@ -5,6 +5,7 @@ import { type AppType } from "next/app";
 import { api } from "@/utils/api";
 
 import "@/styles/globals.css";
+import Layout from "@/pages/layout";
 
 const TwinsApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -12,7 +13,9 @@ const TwinsApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <Component {...pageProps} />
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
     </SessionProvider>
   );
 };
