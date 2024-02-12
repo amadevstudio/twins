@@ -1,6 +1,6 @@
 import { env } from "@/env";
 import { Button } from "@/components/ui/button-base";
-import {signIn, signOut, useSession} from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
 export default function Header() {
@@ -9,7 +9,7 @@ export default function Header() {
   return (
     <header className="container bg-white">
       <nav
-        className="mx-auto flex flex-col md:flex-row max-w-7xl items-center justify-between p-6 lg:px-8"
+        className="mx-auto flex max-w-7xl flex-col items-center justify-between p-6 md:flex-row lg:px-8"
         aria-label="Global"
       >
         <div className="sm:text-center">
@@ -22,16 +22,22 @@ export default function Header() {
             />
           </a>
         </div>
-        <div className="gap-2 flex flex-1 justify-end">
+        <div className="flex flex-1 justify-center md:justify-end max-w-full flex-wrap gap-2">
+          {!!sessionData && (
+            <>
+              <Link href="/">
+                <Button>На главную</Button>
+              </Link>
+              <Link href="/user">
+                <Button>Личный кабинет</Button>
+              </Link>
+            </>
+          )}
           <Link href={`mailto:${env.NEXT_PUBLIC_SUPPORT_EMAIL}`}>
             <Button>Написать в поддержку</Button>
           </Link>
-          {!sessionData &&
-            <Button onClick={() => signIn()}>Войти</Button>
-          }
-          {!!sessionData &&
-              <Button onClick={() => signOut()}>Выйти</Button>
-          }
+          {!sessionData && <Button onClick={() => signIn()}>Войти</Button>}
+          {!!sessionData && <Button onClick={() => signOut()}>Выйти</Button>}
         </div>
       </nav>
     </header>
