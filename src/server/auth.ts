@@ -11,6 +11,8 @@ import GoogleProvider from "next-auth/providers/google"
 import { env } from "@/env";
 import { db } from "@/server/db";
 
+import afterCreateUser from "@/server/service/user";
+
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -32,6 +34,8 @@ declare module "next-auth" {
   // }
 }
 
+const prismaAdapter = PrismaAdapter(db)
+
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
  *
@@ -47,7 +51,16 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   },
-  adapter: PrismaAdapter(db),
+  adapter: {
+    ...prismaAdapter,
+    createUser: async ( user) => {
+      const createdUser = await prismaAdapter.createUser!(user)
+
+      await afterCreateUser(createdUser)
+
+      return createdUser
+    }
+  },
   // pages: {
   //   signIn: "/"
   // },
