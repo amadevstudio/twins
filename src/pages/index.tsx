@@ -48,15 +48,15 @@ function AuthShowcase() {
 
   // const { data: secretMessage } = api.post.getSecretMessage.useQuery(
   //   undefined, // no input
-  //   { enabled: sessionData?.user !== undefined },
+  //   { enabled: sessionData?.user.ts !== undefined },
   // );
 
   const authViaGoogle = async () => {
-    await signIn("google");
+    await signIn("google", { callbackUrl: '/user' });
   };
 
   const authViaEmail = async () => {
-    await signIn();
+    await signIn(undefined, { callbackUrl: '/user' });
   };
 
   return (

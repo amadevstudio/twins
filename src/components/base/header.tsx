@@ -36,7 +36,7 @@ export default function Header() {
           <Link href={`mailto:${env.NEXT_PUBLIC_SUPPORT_EMAIL}`}>
             <Button>Написать в поддержку</Button>
           </Link>
-          {!sessionData && <Button onClick={() => signIn()}>Войти</Button>}
+          {!sessionData && <Button onClick={() => signIn(undefined, { callbackUrl: '/user' })}>Войти</Button>}
           {!!sessionData && <Button onClick={() => signOut()}>Выйти</Button>}
         </div>
       </nav>
