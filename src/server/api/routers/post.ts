@@ -24,7 +24,7 @@
 //       return ctx.db.post.create({
 //         data: {
 //           name: input.name,
-//           createdBy: { connect: { id: ctx.session.user.id } },
+//           createdBy: { connect: { id: ctx.session.user.ts.id } },
 //         },
 //       });
 //     }),
@@ -32,7 +32,7 @@
 //   getLatest: protectedProcedure.query(({ ctx }) => {
 //     return ctx.db.post.findFirst({
 //       orderBy: { createdAt: "desc" },
-//       where: { createdBy: { id: ctx.session.user.id } },
+//       where: { createdBy: { id: ctx.session.user.ts.id } },
 //     });
 //   }),
 //
