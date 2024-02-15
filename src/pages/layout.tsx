@@ -20,7 +20,7 @@ export default function Layout({
       <main
         className={cn(
           "min-h-screen pb-10 flex flex-col",
-          fontSans.variable,
+          // fontSans.variable,
         )}
       >
         <Header/>
