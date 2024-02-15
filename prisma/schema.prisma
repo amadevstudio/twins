@@ -14,6 +14,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Sex {
+  EMPTY
+  MALE
+  FEMALE
+}
+
 // model Post {
 //     id        Int      @id @default(autoincrement())
 //     name      String
@@ -53,21 +59,65 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  // posts         Post[]
-}
-
 model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model User {
+  id                        String                     @id @default(cuid())
+  name                      String?
+  email                     String?                    @unique
+  emailVerified             DateTime?
+  image                     String?
+  accounts                  Account[]
+  sessions                  Session[]
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  userInfo                  UserInfo?
+  userToKeyWords            UserToKeyWord[]
+  userToRegistrationTargets UserToRegistrationTarget[]
+}
+
+model UserInfo {
+  userId         String    @id
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sex            Sex       @default(EMPTY)
+  city           String?
+  birthDay       DateTime?
+  contacts       String?
+  additionalInfo String?
+}
+
+model UserToKeyWord {
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  keyWordId String
+  keyWord   KeyWord @relation(fields: [keyWordId], references: [keyWord], onDelete: Cascade)
+
+  @@unique([userId, keyWordId])
+}
+
+model KeyWord {
+  id             Int             @id @default(autoincrement())
+  keyWord        String          @unique
+  userToKeyWords UserToKeyWord[]
+}
+
+model UserToRegistrationTarget {
+  userId               String
+  user                 User               @relation(fields: [userId], references: [id])
+  registrationTargetId String
+  registrationTarget   RegistrationTarget @relation(fields: [registrationTargetId], references: [target])
+
+  @@unique([userId, registrationTargetId])
+}
+
+model RegistrationTarget {
+  id                        Int                        @id @default(autoincrement())
+  target                    String                     @unique
+  userToRegistrationTargets UserToRegistrationTarget[]
 }
