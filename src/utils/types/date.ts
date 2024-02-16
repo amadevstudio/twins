@@ -5,7 +5,6 @@ export function isValidDate(d: Date) {
 export function showDate(d: Date | undefined) {
   if (d === undefined || !isValidDate(d)) return undefined;
 
-  console.log(d.getDate(), d.getMonth());
   const day = d.getDate() < 10 ? `0${d.getDate()}` : d.getDate().toString();
   const month =
     d.getMonth() < 10 ? `0${d.getMonth() + 1}` : (d.getMonth() + 1).toString();

@@ -11,7 +11,7 @@ import GoogleProvider from "next-auth/providers/google"
 import { env } from "@/env";
 import { db } from "@/server/db";
 
-import afterCreateUser from "@/server/service/user";
+import afterCreate from "@/server/service/user";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
     createUser: async ( user) => {
       const createdUser = await prismaAdapter.createUser!(user)
 
-      await afterCreateUser(createdUser)
+      await afterCreate(createdUser)
 
       return createdUser
     }
