@@ -87,7 +87,7 @@ model UserInfo {
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   sex            Sex       @default(EMPTY)
   city           String?
-  birthDay       DateTime?
+  birthday       DateTime?
   contacts       String?
   additionalInfo String?
 }
@@ -97,13 +97,13 @@ model UserToKeyWord {
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   keyWordId String
   keyWord   KeyWord @relation(fields: [keyWordId], references: [keyWord], onDelete: Cascade)
+  order     Int
 
   @@unique([userId, keyWordId])
 }
 
 model KeyWord {
-  id             Int             @id @default(autoincrement())
-  keyWord        String          @unique
+  keyWord        String          @id
   userToKeyWords UserToKeyWord[]
 }
 
@@ -117,7 +117,6 @@ model UserToRegistrationTarget {
 }
 
 model RegistrationTarget {
-  id                        Int                        @id @default(autoincrement())
-  target                    String                     @unique
+  target                    String                     @id
   userToRegistrationTargets UserToRegistrationTarget[]
 }
