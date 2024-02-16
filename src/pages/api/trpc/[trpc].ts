@@ -2,7 +2,9 @@ import { createNextApiHandler } from "@trpc/server/adapters/next";
 
 import { env } from "@/env";
 import { appRouter } from "@/server/api/root";
-import { createTRPCContext } from "@/server/api/trpc";
+import {createContextInner, createTRPCContext} from "@/server/api/trpc";
+import {createServerSideHelpers} from "@trpc/react-query/server";
+import superjson from "superjson";
 
 // export API handler
 export default createNextApiHandler({
@@ -16,4 +18,10 @@ export default createNextApiHandler({
           );
         }
       : undefined,
+});
+
+export const serverSideHelper = createServerSideHelpers({
+  router: appRouter,
+  ctx: await createContextInner(),
+  transformer: superjson, // optional - adds superjson serialization
 });

@@ -62,6 +62,16 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   });
 };
 
+interface CreateInnerContextOptions extends Partial<CreateNextContextOptions> {
+  session: Session | null;
+}
+export async function createContextInner(opts?: CreateInnerContextOptions) {
+  return {
+    db,
+    session: opts?.session ?? null,
+  };
+}
+
 /**
  * 2. INITIALIZATION
  *
