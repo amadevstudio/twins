@@ -35,7 +35,7 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   addictWithDots,
   isDateBad,
@@ -140,9 +140,8 @@ function UserInfoShow({
       .join(" ");
   };
 
-  const form = useForm<z.infer<typeof updateUserSchema>>({
-    resolver: zodResolver(updateUserSchema),
-    defaultValues: {
+  function getFormValues() {
+    return {
       name: userData?.name ?? "",
       sex:
         userData?.userInfo?.sex !== "EMPTY" &&
@@ -158,7 +157,12 @@ function UserInfoShow({
       registrationTarget: userData?.userToRegistrationTargets?.map(
         (utrt) => utrt.registrationTarget.target,
       ),
-    },
+    };
+  }
+
+  const form = useForm<z.infer<typeof updateUserSchema>>({
+    resolver: zodResolver(updateUserSchema),
+    defaultValues: getFormValues(),
   });
 
   const [birthdayDirectInput, setBirthdayDirectInput] = React.useState(
@@ -205,9 +209,16 @@ function UserInfoShow({
   const userUpdateMutation = api.user.update.useMutation({
     async onSuccess(input) {
       await context.user.self.invalidate();
-      form.setValue("keyWords", prepareKeyWordsToShow(userData?.userToKeyWords));
+      form.setValue(
+        "keyWords",
+        prepareKeyWordsToShow(userData?.userToKeyWords),
+      );
     },
   });
+
+  useEffect(() => {
+    form.reset(getFormValues());
+  }, [userData]);
 
   function onSubmit(data: z.infer<typeof updateUserSchema>) {
     userUpdateMutation.mutate(data);
