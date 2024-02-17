@@ -5,6 +5,7 @@ import { queryUserType } from "@/server/api/types/user";
 import * as registrationTargetRepo from "@/server/repository/registrationTarget";
 import * as keyWordRepo from "@/server/repository/keyWord";
 import {processKeyWordsString} from "@/server/service/keyWord";
+import { env } from "@/env";
 
 export async function afterCreate(adapterUser: AdapterUser) {
   const user = await userRepo.findById(adapterUser.id);
@@ -49,7 +50,7 @@ export async function updateUserInfo(userId: string, info: queryUserType) {
 
   // KeyWords processing
   // Make
-  const newKeyWords = processKeyWordsString(info.keyWords)
+  const newKeyWords = processKeyWordsString(info.keyWords).slice(0, Number(env.NEXT_PUBLIC_MAX_KEY_WORDS))
   const newkeyWordsCreated = await keyWordRepo.findOrCreateByIds(newKeyWords)
   // To delete
   const keyWordsConnectionsToDelete = user.userToKeyWords.filter(
