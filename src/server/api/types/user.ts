@@ -5,7 +5,7 @@ export const userNameSchema = z.string().min(2).max(100);
 export const userSexAllowed = ["MALE", "FEMALE"] as const;
 export const userSexSchema = z.enum(userSexAllowed);
 
-export const citySchema = z.string();
+export const citySchema = z.string().optional();
 
 export const birthdaySchema = z.date().optional();
 
@@ -13,7 +13,7 @@ export const contactsSchema = z.string().min(1);
 
 export const keyWordsSchema = z.string().min(1);
 
-export const additionalInfoSchema = z.string();
+export const additionalInfoSchema = z.string().optional();
 
 // const registrationTargets: string[] = (await registrationTarget.getAll()).map(
 //   (t) => {

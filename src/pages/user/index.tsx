@@ -48,6 +48,7 @@ import { env } from "@/env";
 import { serverSideHelper } from "@/pages/api/trpc/[trpc]";
 import { Checkbox } from "@/components/ui/checkbox";
 import * as entitiesI18n from "@/utils/i18n/entities/t";
+import { UseTRPCMutationResult } from "@trpc/react-query/shared";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
@@ -120,9 +121,24 @@ function UserInfoShow({
   className: string;
   userData: RouterOutput["user"]["self"];
 }) {
+  const context = api.useUtils();
+
   const registrationTargets = api.registrationTarget.getAll.useQuery();
 
   const updateUserSchema = queryUserSchema;
+
+  const prepareKeyWordsToShow = (
+    userToKeyWords:
+      | { order: number; keyWord: { keyWord: string } }[]
+      | undefined,
+  ) => {
+    if (userToKeyWords === undefined) return "";
+
+    return userToKeyWords
+      .sort((a, b) => a.order - b.order)
+      .map((utkw) => utkw.keyWord.keyWord)
+      .join(" ");
+  };
 
   const form = useForm<z.infer<typeof updateUserSchema>>({
     resolver: zodResolver(updateUserSchema),
@@ -136,12 +152,9 @@ function UserInfoShow({
           : undefined,
       city: userData?.userInfo?.city ?? "",
       birthday: userData?.userInfo?.birthday ?? undefined,
-      contacts: userData?.userInfo?.contacts ?? undefined,
-      keyWords: userData?.userToKeyWords
-        .sort((a, b) => a.order - b.order)
-        .map((utkw) => utkw.keyWord.keyWord)
-        .join(" "),
-      additionalInfo: userData?.userInfo?.additionalInfo ?? undefined,
+      contacts: userData?.userInfo?.contacts ?? "",
+      keyWords: prepareKeyWordsToShow(userData?.userToKeyWords),
+      additionalInfo: userData?.userInfo?.additionalInfo ?? "",
       registrationTarget: userData?.userToRegistrationTargets?.map(
         (utrt) => utrt.registrationTarget.target,
       ),
@@ -149,9 +162,7 @@ function UserInfoShow({
   });
 
   const [birthdayDirectInput, setBirthdayDirectInput] = React.useState(
-    userData?.userInfo?.birthday
-      ? showDate(userData.userInfo.birthday)
-      : undefined,
+    userData?.userInfo?.birthday ? showDate(userData.userInfo.birthday) : "",
   );
 
   let birthdayDirectInputBackspaceFlag = false;
@@ -191,8 +202,15 @@ function UserInfoShow({
     form.clearErrors();
   }
 
+  const userUpdateMutation = api.user.update.useMutation({
+    async onSuccess(input) {
+      await context.user.self.invalidate();
+      form.setValue("keyWords", prepareKeyWordsToShow(userData?.userToKeyWords));
+    },
+  });
+
   function onSubmit(data: z.infer<typeof updateUserSchema>) {
-    console.log(data);
+    userUpdateMutation.mutate(data);
   }
 
   return (
@@ -360,9 +378,7 @@ function UserInfoShow({
                 <FormControl>
                   <Textarea className="resize-none" {...field} />
                 </FormControl>
-                <FormMessage
-                  defaultError={`Поле обязательно к заполнению, можно ввести не более ${env.NEXT_PUBLIC_MAX_KEY_WORDS} слов`}
-                />
+                <FormMessage defaultError={`Поле обязательно к заполнению`} />
               </FormItem>
             )}
           />
@@ -373,7 +389,9 @@ function UserInfoShow({
             render={() => (
               <FormItem>
                 <div className="mb-4">
-                  <FormLabel className="text-base">Ваша цель (обязательно)</FormLabel>
+                  <FormLabel className="text-base">
+                    Ваша цель (обязательно)
+                  </FormLabel>
                   <FormDescription>
                     Указать в чекбоксе нужное, можно указать все или несколько
                   </FormDescription>
