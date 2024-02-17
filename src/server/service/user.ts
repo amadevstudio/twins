@@ -1,7 +1,7 @@
 import { AdapterUser } from "next-auth/adapters";
 import * as userRepo from "@/server/repository/user";
 import * as userInfoRepo from "@/server/repository/userInfo";
-import { queryUserType } from "@/server/api/types/user";
+import {queryUserType, searchUserType} from "@/server/api/types/user";
 import * as registrationTargetRepo from "@/server/repository/registrationTarget";
 import * as keyWordRepo from "@/server/repository/keyWord";
 import {processKeyWordsString} from "@/server/service/keyWord";
@@ -19,6 +19,14 @@ export async function findById(userId: string) {
 export async function findByIdWithInfo(userId: string) {
   return userRepo.findByIdWithInfo(userId);
 }
+
+export async function findByKeyWords(keyWordsData: searchUserType) {
+  const keyWords = processKeyWordsString(keyWordsData.query).slice(0, Number(env.NEXT_PUBLIC_MAX_KEY_WORDS))
+  return userRepo.findByKeyWords(keyWords, keyWordsData.page);
+}
+
+
+// Dangerous below
 
 export async function updateUserInfo(userId: string, info: queryUserType) {
   const user = await findByIdWithInfo(userId);

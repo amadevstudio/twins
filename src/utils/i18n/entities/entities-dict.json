@@ -1,4 +1,8 @@
 {
+  "sex": {
+    "male": "Мужской",
+    "female": "Женский"
+  },
   "registrationTarget": {
     "business": "Бизнес/деловой нетворкинг",
     "friendship": "Дружба",

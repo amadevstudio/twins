@@ -37,3 +37,21 @@ export const queryUserSchema = z.object({
 });
 
 export type queryUserType = z.infer<typeof queryUserSchema>;
+
+//
+
+export const keyWordsSearchSchema = z.string()
+
+export const searchUserPageSize = 10;
+
+export const searchUserPageSchema = z.union(
+  [z.number().int().positive().min(1), z.nan()]).optional()
+
+export const searchUserSchema = z.object({
+  query: keyWordsSearchSchema,
+  page: searchUserPageSchema
+})
+
+export type searchUserType = z.infer<typeof searchUserSchema>
+
+

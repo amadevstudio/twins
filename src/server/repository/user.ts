@@ -1,5 +1,5 @@
 import { db } from "@/server/db";
-import { queryUserType } from "@/server/api/types/user";
+import { queryUserType, searchUserPageSize } from "@/server/api/types/user";
 import {
   KeyWord,
   Prisma,
@@ -10,9 +10,15 @@ import {
 } from "@prisma/client";
 import SortOrder = Prisma.SortOrder;
 
-const userFullInfoQuery = {
+const userBaseInfoQuery = {
   include: {
     userInfo: true,
+  },
+};
+
+const userFullInfoQuery = {
+  include: {
+    ...userBaseInfoQuery.include,
     userToKeyWords: {
       include: {
         keyWord: true,
@@ -48,6 +54,43 @@ export async function findByIdWithInfo(userId: string) {
   };
   return db.user.findFirst(query);
 }
+
+export async function findByKeyWords(keyWords: string[], pageParam?: number) {
+  const pageSize = searchUserPageSize;
+  const page = pageParam ?? 1;
+  const skip = (page - 1) * pageSize ?? 0;
+
+  const query = {
+    where: {
+      userToKeyWords: {
+        every: {
+          keyWordId: {
+            in: keyWords,
+          },
+        },
+      },
+    },
+  };
+
+  const [results, count] = await db.$transaction([
+    db.user.findMany({
+      ...query,
+      ...userBaseInfoQuery,
+      skip: skip,
+      take: pageSize,
+    }),
+    db.user.count(query),
+  ]);
+
+  return {
+    results: results,
+    pagination: {
+      total: count,
+    },
+  };
+}
+
+// Dangerous
 
 export async function updateUserInfo(userId: string, info: queryUserType) {
   return db.user.update({

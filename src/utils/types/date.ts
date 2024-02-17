@@ -1,3 +1,5 @@
+import { differenceInYears } from "date-fns";
+
 export function isValidDate(d: Date) {
   return d.toString() !== "Invalid Date";
 }
@@ -9,6 +11,12 @@ export function showDate(d: Date | undefined) {
   const month =
     d.getMonth() < 10 ? `0${d.getMonth() + 1}` : (d.getMonth() + 1).toString();
   return isValidDate(d) ? `${day}.${month}.${d.getFullYear()}` : undefined;
+}
+
+export function age(d: Date | undefined) {
+  if (d === undefined || !isValidDate(d)) return undefined;
+
+  return differenceInYears(new Date(), d);
 }
 
 export function addictWithDots(date: string, deleteFlag: boolean) {

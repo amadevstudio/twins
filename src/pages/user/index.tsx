@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import React, { useEffect } from "react";
 import {
   addictWithDots,
@@ -48,7 +48,6 @@ import { env } from "@/env";
 import { serverSideHelper } from "@/pages/api/trpc/[trpc]";
 import { Checkbox } from "@/components/ui/checkbox";
 import * as entitiesI18n from "@/utils/i18n/entities/t";
-import { UseTRPCMutationResult } from "@trpc/react-query/shared";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
@@ -180,7 +179,7 @@ function UserInfoShow({
       birthdayDirectInputBackspaceFlag,
     );
     setBirthdayDirectInput(augmentedInput);
-    const newBirthday = new Date(augmentedInput);
+    const newBirthday = parse(augmentedInput, "dd.MM.yyyy", new Date());
     if (isValidDate(newBirthday) && !isDateBad(newBirthday)) {
       form.setValue("birthday", newBirthday);
       form.clearErrors();
