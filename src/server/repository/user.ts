@@ -72,41 +72,47 @@ export async function findByKeyWords(
   keyWords: string[],
   pageParam?: number,
 ) {
+  if (keyWords.length == 0) {
+    return new Promise(function(resolve, _) {
+      resolve({
+        results: [],
+        pagination: {
+          total: 0
+        }
+      })
+    })
+  }
+
   const pageSize = searchUserPageSize;
   const page = pageParam ?? 1;
   const skip = (page - 1) * pageSize ?? 0;
 
-  const excludedUsersQuery = (userId ? [userId] : []).concat(
-    (
-      await db.userToKeyWord.groupBy({
-        by: ["userId"],
-        having: {
-          userId: {
-            _count: {
-              equals: keyWords.length,
-            },
-          },
-        },
-      })
-    ).map((u) => u.userId),
+  const queryParams: string[] = [];
+  const rawQueryKeyWords: string[] = [];
+  keyWords.forEach((kw, i) => {
+    queryParams.push(kw);
+    rawQueryKeyWords.push(`utkw."keyWordId" = $${i + 1}`);
+  });
+
+  const sqlQuery = `
+      SELECT u.id FROM "User" AS u
+      INNER JOIN "UserToKeyWord" AS utkw ON (
+        utkw."userId" = u."id"
+        AND (${rawQueryKeyWords.join(" OR ")}))
+      GROUP BY u."id"
+      HAVING COUNT(*) = ${keyWords.length}
+    `;
+
+  const selectedUserIds: { id: string }[] = await db.$queryRawUnsafe(
+    sqlQuery,
+    ...queryParams,
   );
 
   const query = {
     where: {
-      id: {
-        in: excludedUsersQuery,
-      },
-
+      id: { in: selectedUserIds.map((id) => id.id) },
       NOT: {
         id: userId,
-      },
-
-      userToKeyWords: {
-        every: {
-          keyWordId: {
-            in: keyWords,
-          },
-        },
       },
     },
   };
