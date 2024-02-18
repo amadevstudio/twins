@@ -14,5 +14,6 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - `docker compose build`
 - `docker compose up`
 - `docker compose exec app sh`
-- `npx prisma db seed`
+- `npx prisma generate`
 - `npx prisma db push` TODO: change to `npx prisma migrate production`
+- `npx prisma db seed` or `npx ts-node --esm prisma/seed.ts`
