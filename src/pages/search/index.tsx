@@ -35,7 +35,7 @@ import * as entitiesI18n from "@/utils/i18n/entities/t";
 import { age, showDate } from "@/utils/types/date";
 import Link from "next/link";
 
-type RouterOutput = inferRouterOutputs<AppRouter>;
+type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export default function Home() {
   const router = useRouter();
