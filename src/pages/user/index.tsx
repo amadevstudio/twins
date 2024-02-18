@@ -80,6 +80,7 @@ export default function User(
 
   const userData = api.user.self.useQuery(undefined, {
     enabled: session?.user?.id !== undefined,
+    refetchOnWindowFocus: false
   });
 
   return (
