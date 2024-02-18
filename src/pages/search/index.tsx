@@ -132,12 +132,7 @@ function SearchResults({
                     </CardTitle>
                     <CardDescription>
                       {[
-                        user.name,
                         age(user.userInfo?.birthday ?? undefined),
-                        entitiesI18n.t(
-                          "sex",
-                          user.userInfo?.sex?.toLowerCase() ?? "",
-                        ),
                         user.userInfo?.city,
                       ].filter(ui => ui != undefined).join(", ")}
                     </CardDescription>

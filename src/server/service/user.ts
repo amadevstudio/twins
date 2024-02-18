@@ -20,9 +20,9 @@ export async function findByIdWithInfo(userId: string) {
   return userRepo.findByIdWithInfo(userId);
 }
 
-export async function findByKeyWords(keyWordsData: searchUserType) {
+export async function findByKeyWords(userId: string | undefined, keyWordsData: searchUserType) {
   const keyWords = processKeyWordsString(keyWordsData.query).slice(0, Number(env.NEXT_PUBLIC_MAX_KEY_WORDS))
-  return userRepo.findByKeyWords(keyWords, keyWordsData.page);
+  return userRepo.findByKeyWords(userId, keyWords, keyWordsData.page);
 }
 
 

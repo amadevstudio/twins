@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/pagination";
 import React from "react";
 import { pageParamName } from "@/pages/search/helper";
+import {isNumber} from "is-what";
 
 export default function PaginationConstructor({
   total,
@@ -25,9 +26,9 @@ export default function PaginationConstructor({
   baseUrl: string;
   pageParamName: string;
 }) {
-  const pagesCount = !!total ? Math.ceil(total / perPage) : undefined;
+  const pagesCount = isNumber(total) ? Math.ceil(total / perPage) : undefined;
 
-  if (pagesCount && pagesCount < 2) {
+  if (isNumber(pagesCount) && pagesCount < 2) {
     return null;
   }
 

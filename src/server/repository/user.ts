@@ -55,13 +55,40 @@ export async function findByIdWithInfo(userId: string) {
   return db.user.findFirst(query);
 }
 
-export async function findByKeyWords(keyWords: string[], pageParam?: number) {
+export async function findByKeyWords(
+  userId: string | undefined,
+  keyWords: string[],
+  pageParam?: number,
+) {
   const pageSize = searchUserPageSize;
   const page = pageParam ?? 1;
   const skip = (page - 1) * pageSize ?? 0;
 
+  const excludedUsersQuery = (userId ? [userId] : []).concat(
+    (
+      await db.userToKeyWord.groupBy({
+        by: ["userId"],
+        having: {
+          userId: {
+            _count: {
+              equals: keyWords.length,
+            },
+          },
+        },
+      })
+    ).map((u) => u.userId),
+  );
+
   const query = {
     where: {
+      id: {
+        in: excludedUsersQuery,
+      },
+
+      NOT: {
+        id: userId
+      },
+
       userToKeyWords: {
         every: {
           keyWordId: {

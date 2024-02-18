@@ -16,7 +16,7 @@ export const user = createTRPCRouter({
   findByKeyWords: publicProcedure
     .input(searchUserSchema)
     .query(async ({ ctx, input }) => {
-      return userService.findByKeyWords(input);
+      return userService.findByKeyWords(ctx.session?.user?.id, input);
     }),
 
   // Protected below
