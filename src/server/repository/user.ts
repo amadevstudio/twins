@@ -16,17 +16,8 @@ const userBaseInfoQuery = {
   },
 };
 
-const userFullInfoQuery = {
+const userWithRegistrationTargetsQuery = {
   include: {
-    ...userBaseInfoQuery.include,
-    userToKeyWords: {
-      include: {
-        keyWord: true,
-      },
-      orderBy: {
-        order: SortOrder.asc,
-      },
-    },
     userToRegistrationTargets: {
       include: {
         registrationTarget: true,
@@ -35,8 +26,29 @@ const userFullInfoQuery = {
   },
 };
 
+const userFullInfoQuery = {
+  include: {
+    ...userBaseInfoQuery.include,
+    ...userWithRegistrationTargetsQuery.include,
+    userToKeyWords: {
+      include: {
+        keyWord: true,
+      },
+      orderBy: {
+        order: SortOrder.asc,
+      },
+    },
+  },
+};
+
 export async function findById(userId: string) {
-  const query = { where: { id: userId } };
+  const query = {
+    where: { id: userId },
+    include: {
+      ...userBaseInfoQuery.include,
+      ...userWithRegistrationTargetsQuery.include,
+    },
+  };
   return db.user.findFirst(query);
 }
 
@@ -86,7 +98,7 @@ export async function findByKeyWords(
       },
 
       NOT: {
-        id: userId
+        id: userId,
       },
 
       userToKeyWords: {

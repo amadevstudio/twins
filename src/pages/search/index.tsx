@@ -30,7 +30,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import * as entitiesI18n from "@/utils/i18n/entities/t";
-import {age, showDate} from "@/utils/types/date";
+import { age, showDate } from "@/utils/types/date";
+import Link from "next/link";
 
 export default function Home() {
   const router = useRouter();
@@ -119,34 +120,36 @@ function SearchResults({
           data.results.map(
             (user) =>
               !!user && (
-                <Card key={user.id} className="w-full">
-                  <CardHeader>
-                    <CardTitle>
-                      {[
-                        user.name,
-                        entitiesI18n.t(
-                          "sex",
-                          user.userInfo?.sex?.toLowerCase() ?? "",
-                        ),
-                      ].filter(ui => ui != undefined).join(", ")}
-                    </CardTitle>
-                    <CardDescription>
-                      {[
-                        age(user.userInfo?.birthday ?? undefined),
-                        user.userInfo?.city,
-                      ].filter(ui => ui != undefined).join(", ")}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex">
-                    <ProfilePhoto email={user.email ?? ""} />
-                    <div className="p-2">
-                      {user.userInfo?.additionalInfo}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    {user.userInfo?.contacts}
-                  </CardFooter>
-                </Card>
+                <Link key={user.id} href={`/user/${user.id}`}>
+                  <Card className="w-full">
+                    <CardHeader>
+                      <CardTitle>
+                        {[
+                          user.name,
+                          entitiesI18n.t(
+                            "sex",
+                            user.userInfo?.sex?.toLowerCase() ?? "",
+                          ),
+                        ]
+                          .filter((ui) => ui != undefined)
+                          .join(", ")}
+                      </CardTitle>
+                      <CardDescription>
+                        {[
+                          age(user.userInfo?.birthday ?? undefined),
+                          user.userInfo?.city,
+                        ]
+                          .filter((ui) => ui != undefined)
+                          .join(", ")}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex">
+                      <ProfilePhoto email={user.email ?? ""} />
+                      <div className="p-2">{user.userInfo?.additionalInfo}</div>
+                    </CardContent>
+                    <CardFooter>{user.userInfo?.contacts}</CardFooter>
+                  </Card>
+                </Link>
               ),
           )}
       </div>
