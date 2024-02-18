@@ -11,7 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { useRouter } from "next/router";
-import { api, RouterOutputs } from "@/utils/api";
+import { api } from "@/utils/api";
+import type { inferRouterOutputs } from "@trpc/server";
+import type { AppRouter } from "@/server/api/root";
 import { useSearchParams } from "next/navigation";
 import {
   constructSearchUrl,
@@ -32,6 +34,8 @@ import {
 import * as entitiesI18n from "@/utils/i18n/entities/t";
 import { age, showDate } from "@/utils/types/date";
 import Link from "next/link";
+
+type RouterOutput = inferRouterOutputs<AppRouter>;
 
 export default function Home() {
   const router = useRouter();
