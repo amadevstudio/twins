@@ -17,6 +17,7 @@ const config = {
     locales: ["ru"],
     defaultLocale: "ru",
   },
+  output: "standalone",
 };
 
 export default config;

@@ -10,3 +10,7 @@ Built on the [T3 Stack](https://create.t3.gg/) project.
 ## How do I deploy this?
 
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+- `docker compose build`
+- `docker compose up`
+- `npx prisma db push` TODO: change to `npx prisma migrate production`

@@ -3,6 +3,8 @@
 
 // TODO: use ts modules?
 
+// TODO: nextjs i18n?
+
 const entitiesDict: Record<string, Record<string, string>> = {
   sex: {
     male: "Мужской",
