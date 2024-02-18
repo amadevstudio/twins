@@ -14,7 +14,7 @@ import {Form, FormControl, FormField, FormItem, FormMessage} from "@/components/
 import React from "react";
 import {redirect} from "next/navigation";
 import {useRouter} from "next/router";
-import {constructSearchUrl} from "@/pages/search/helper";
+import {constructSearchUrl} from "@/utils/view/search/helper";
 
 export const fontSans = FontSans({
   subsets: ["latin"],

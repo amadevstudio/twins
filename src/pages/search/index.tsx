@@ -18,7 +18,7 @@ import {
   getBaseUrl,
   pageParamName,
   searchParamName,
-} from "@/pages/search/helper";
+} from "@/utils/view/search/helper";
 import PaginationConstructor from "@/components/base/pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {

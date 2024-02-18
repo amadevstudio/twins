@@ -8,7 +8,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import React from "react";
-import { pageParamName } from "@/pages/search/helper";
+import { pageParamName } from "@/utils/view/search/helper";
 import {isNumber} from "is-what";
 
 export default function PaginationConstructor({
