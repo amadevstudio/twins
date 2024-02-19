@@ -21,7 +21,7 @@ export default function User() {
   const user = userQuery.data;
 
   return (
-    <div class="container">
+    <div className="container">
       <Card className="w-full">
         <CardHeader>
           <CardTitle>
