@@ -21,40 +21,42 @@ export default function User() {
   const user = userQuery.data;
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>
-          {[
-            user?.name,
-            entitiesI18n.t("sex", user?.userInfo?.sex?.toLowerCase() ?? ""),
-          ]
-            .filter((ui) => ui != undefined)
-            .join(", ")}
-        </CardTitle>
-        <CardDescription>
-          {[age(user?.userInfo?.birthday ?? undefined), user?.userInfo?.city]
-            .filter((ui) => ui != undefined)
-            .join(", ")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex">
-        <ProfilePhoto email={user?.email ?? ""} />
-        <div className="flex-col p-2">
-          <div>{user?.userInfo?.additionalInfo}</div>
-          <div className="flex gap-2">
-            {user?.userToRegistrationTargets?.map((utrt) => (
-              <Badge key={utrt.registrationTargetId}>
-                {entitiesI18n.t(
-                  "registrationTarget",
-                  utrt.registrationTarget.target,
-                )}
-              </Badge>
-            ))}
+    <div class="container">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>
+            {[
+              user?.name,
+              entitiesI18n.t("sex", user?.userInfo?.sex?.toLowerCase() ?? ""),
+            ]
+              .filter((ui) => ui != undefined)
+              .join(", ")}
+          </CardTitle>
+          <CardDescription>
+            {[age(user?.userInfo?.birthday ?? undefined), user?.userInfo?.city]
+              .filter((ui) => ui != undefined)
+              .join(", ")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex">
+          <ProfilePhoto email={user?.email ?? ""} />
+          <div className="flex-col p-2">
+            <div>{user?.userInfo?.additionalInfo}</div>
+            <div className="flex gap-2">
+              {user?.userToRegistrationTargets?.map((utrt) => (
+                <Badge key={utrt.registrationTargetId}>
+                  {entitiesI18n.t(
+                    "registrationTarget",
+                    utrt.registrationTarget.target,
+                  )}
+                </Badge>
+              ))}
+            </div>
           </div>
-        </div>
-      </CardContent>
-      <CardFooter>{user?.userInfo?.contacts}</CardFooter>
-    </Card>
+        </CardContent>
+        <CardFooter>{user?.userInfo?.contacts}</CardFooter>
+      </Card>
+    </div>
   );
 }
 
