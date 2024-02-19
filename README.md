@@ -17,3 +17,7 @@ Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 - `npx prisma generate`
 - `npx prisma db push` TODO: change to `npx prisma migrate production`
 - `npx prisma db seed` or `npx ts-node --esm prisma/seed.ts`
+
+## TODO
+1. Query production logging (middleware to trpc with winston?)
+2. Setup auto deploy with proper migrations 
