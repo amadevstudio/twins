@@ -73,7 +73,7 @@ export async function findByKeyWords(
   pageParam?: number,
 ) {
   if (keyWords.length == 0) {
-    return new Promise(function(resolve, _) {
+    return new Promise(function(resolve: (value: {results: []; pagination: {total: number}}) => void, _) {
       resolve({
         results: [],
         pagination: {

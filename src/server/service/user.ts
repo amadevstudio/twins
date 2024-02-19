@@ -59,14 +59,14 @@ export async function updateUserInfo(userId: string, info: queryUserType) {
   // KeyWords processing
   // Make
   const newKeyWords = processKeyWordsString(info.keyWords).slice(0, Number(env.NEXT_PUBLIC_MAX_KEY_WORDS))
-  const newkeyWordsCreated = await keyWordRepo.findOrCreateByIds(newKeyWords)
+  const newKeyWordsCreated = await keyWordRepo.findOrCreateByIds(newKeyWords)
   // To delete
   const keyWordsConnectionsToDelete = user.userToKeyWords.filter(
     (utkw) => !newKeyWords.includes(utkw.keyWordId),
   );
   await userRepo.deleteKeyWordsConnection(user, keyWordsConnectionsToDelete);
   // Order new
-  const newKeyWordsOrdered = newkeyWordsCreated.map((nkw, i) => {
+  const newKeyWordsOrdered = newKeyWordsCreated.map((nkw, i) => {
     return {
       keyWord: nkw,
       order: i
