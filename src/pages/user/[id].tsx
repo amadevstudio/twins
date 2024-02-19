@@ -39,17 +39,18 @@ export default function User() {
       </CardHeader>
       <CardContent className="flex">
         <ProfilePhoto email={user?.email ?? ""} />
-        <div className="p-2">
-          {user?.userInfo?.additionalInfo}
-          <br />
-          {user?.userToRegistrationTargets?.map((utrt) => (
-            <Badge key={utrt.registrationTargetId}>
-              {entitiesI18n.t(
-                "registrationTarget",
-                utrt.registrationTarget.target,
-              )}
-            </Badge>
-          ))}
+        <div className="flex-col p-2">
+          <div>{user?.userInfo?.additionalInfo}</div>
+          <div className="flex gap-2">
+            {user?.userToRegistrationTargets?.map((utrt) => (
+              <Badge key={utrt.registrationTargetId}>
+                {entitiesI18n.t(
+                  "registrationTarget",
+                  utrt.registrationTarget.target,
+                )}
+              </Badge>
+            ))}
+          </div>
         </div>
       </CardContent>
       <CardFooter>{user?.userInfo?.contacts}</CardFooter>
