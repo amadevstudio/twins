@@ -1,5 +1,7 @@
 # Twins
 
+[![Continuous deployment](https://github.com/kinton/twins/actions/workflows/main.yml/badge.svg)](https://github.com/kinton/twins/actions/workflows/main.yml)
+
 Built on the [T3 Stack](https://create.t3.gg/) project.
 
 ## Database operations
