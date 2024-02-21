@@ -9,7 +9,7 @@ export default function Header() {
   return (
     <header className="container bg-white">
       <nav
-        className="mx-auto flex max-w-7xl flex-col items-center justify-between p-6 md:flex-row lg:px-8"
+        className="mx-auto flex flex-col items-center justify-between py-6 md:flex-row gap-5"
         aria-label="Global"
       >
         <Link href="/" className="sm:text-center">
