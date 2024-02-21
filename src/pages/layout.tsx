@@ -3,7 +3,7 @@ import Head from "next/head";
 import {env} from "@/env";
 import {cn} from "@/lib/utils";
 import Header from "@/components/base/header";
-import {fontSans} from "@/pages/index";
+import {projectFont} from "@/pages/index";
 
 export default function Layout({
   children
@@ -20,7 +20,7 @@ export default function Layout({
       <main
         className={cn(
           "min-h-screen pb-10 flex flex-col",
-          // fontSans.variable,
+          projectFont.className,
         )}
       >
         <Header/>
