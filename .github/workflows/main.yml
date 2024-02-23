@@ -38,4 +38,4 @@ jobs:
             docker compose build
             # Restarting
             docker compose stop app
-            docker compose up app
+            docker compose up app -d
