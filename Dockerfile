@@ -52,7 +52,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 COPY --from=builder /app/prisma/schema.prisma ./
-# RUN npx prisma migrate deploy
+RUN npx prisma migrate deploy
 
 USER nextjs
 EXPOSE 3000
