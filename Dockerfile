@@ -52,10 +52,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 COPY --from=builder /app/prisma/schema.prisma ./
-RUN npx prisma migrate deploy
+
+COPY --from=builder --chown=nextjs:nextjs /app/entrypoint.sh ./
+RUN chmod u+x ./entrypoint.sh
 
 USER nextjs
 EXPOSE 3000
 ENV PORT 3000
 
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "./entrypoint.sh"]
