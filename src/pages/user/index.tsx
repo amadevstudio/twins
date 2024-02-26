@@ -208,7 +208,6 @@ function UserInfoShow({
   }
 
   const userUpdateMutation = api.user.update.useMutation({
-    async onMutate() {},
     async onSuccess(input) {
       await context.user.self.invalidate();
       form.setValue(
