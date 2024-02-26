@@ -11,13 +11,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
   Form,
-  FormControl,
+  FormControl, FormDescription,
   FormField,
   FormItem,
 } from "@/components/ui/form";
 import React from "react";
 import { useRouter } from "next/router";
 import { constructSearchUrl } from "@/utils/view/search/helper";
+import SearchForm from "@/components/base/search";
 
 export const projectFont = Roboto({
   weight: "400",
@@ -42,28 +43,7 @@ export default function Home() {
 
   return (
     <div className="container flex flex-col items-center justify-between pt-20">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex w-full flex-col items-center gap-5 md:flex-row"
-        >
-          <FormField
-            control={form.control}
-            name="query"
-            render={({ field }) => (
-              <FormItem className="w-full md:flex-grow">
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Введите ключевые слова для поиска нужного вам человека"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <Button type="submit">Найти</Button>
-        </form>
-      </Form>
+      <SearchForm form={form} onSubmit={onSubmit} />
 
       <div className="flex flex-col items-center justify-center gap-12 px-4 py-16">
         <div className="flex flex-col items-center gap-2">
