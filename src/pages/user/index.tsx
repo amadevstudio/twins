@@ -48,6 +48,7 @@ import { env } from "@/env";
 import { serverSideHelper } from "@/pages/api/trpc/[trpc]";
 import { Checkbox } from "@/components/ui/checkbox";
 import * as entitiesI18n from "@/utils/i18n/entities/t";
+import { toast } from "sonner";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
@@ -80,7 +81,7 @@ export default function User(
 
   const userData = api.user.self.useQuery(undefined, {
     enabled: session?.user?.id !== undefined,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 
   return (
@@ -207,12 +208,14 @@ function UserInfoShow({
   }
 
   const userUpdateMutation = api.user.update.useMutation({
+    async onMutate() {},
     async onSuccess(input) {
       await context.user.self.invalidate();
       form.setValue(
         "keyWords",
         prepareKeyWordsToShow(userData?.userToKeyWords),
       );
+      toast("Сохранено");
     },
   });
 
@@ -445,7 +448,9 @@ function UserInfoShow({
             )}
           />
 
-          <Button type="submit">Сохранить</Button>
+          <Button type="submit" disabled={userUpdateMutation.isLoading}>
+            {userUpdateMutation.isLoading ? "Сохранение..." : "Сохранить"}
+          </Button>
         </form>
       </Form>
     </div>

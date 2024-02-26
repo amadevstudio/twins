@@ -1,15 +1,12 @@
 import React from "react";
 import Head from "next/head";
-import {env} from "@/env";
-import {cn} from "@/lib/utils";
+import { env } from "@/env";
+import { cn } from "@/lib/utils";
 import Header from "@/components/base/header";
-import {projectFont} from "@/pages/index";
+import { projectFont } from "@/pages/index";
+import { Toaster } from "@/components/ui/sonner"
 
-export default function Layout({
-  children
-}: {
-  children: React.ReactNode
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Head>
@@ -19,16 +16,16 @@ export default function Layout({
       </Head>
       <main
         className={cn(
-          "min-h-screen pb-10 flex flex-col",
+          "flex min-h-screen flex-col pb-10",
           projectFont.className,
         )}
       >
-        <Header/>
+        <Header />
 
-        <div className="flex flex-1">
-          {children}
-        </div>
+        <div className="flex flex-1">{children}</div>
+
+        <Toaster />
       </main>
     </>
-  )
+  );
 }
