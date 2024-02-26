@@ -34,6 +34,7 @@ import {
 import * as entitiesI18n from "@/utils/i18n/entities/t";
 import { age, showDate } from "@/utils/types/date";
 import Link from "next/link";
+import SearchForm from "@/components/base/search";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
@@ -69,28 +70,7 @@ export default function Home() {
 
   return (
     <div className="container flex flex-col items-center">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex w-full flex-col items-center gap-5 md:flex-row"
-        >
-          <FormField
-            control={form.control}
-            name="query"
-            render={({ field }) => (
-              <FormItem className="w-full md:flex-grow">
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Введите ключевые слова для поиска нужного вам человека"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <Button type="submit">Найти</Button>
-        </form>
-      </Form>
+      <SearchForm form={form} onSubmit={onSubmit} />
 
       <div className="container pt-20">
         {!searchResults.data && <p>Поиск...</p>}
