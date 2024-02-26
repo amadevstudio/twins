@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 /**
  * The following errors are passed as error query parameters to the default or overridden error page.
@@ -28,13 +28,13 @@ type ErrorPageParam = "Configuration" | "AccessDenied" | "Verification";
 
 /** Renders an error page. */
 export default function ErrorPage() {
-  const url = env.NEXT_PUBLIC_DOMAIN;
+  const url = new URL(env.NEXT_PUBLIC_DOMAIN);
 
   const searchParams = useSearchParams();
   const error: ErrorPageParam =
     (searchParams.get("error") as ErrorPageParam) ?? "default";
 
-  const signinPageUrl = `${url}/signin`;
+  const signinPageUrl = `${url.href}/auth/signin`;
 
   const errors: Record<ErrorPageParam | "default", ErrorView> = {
     default: {
@@ -42,9 +42,7 @@ export default function ErrorPage() {
       heading: "Error",
       message: (
         <p>
-          <a className="site" href={url}>
-            {url}
-          </a>
+          <Link href={url.href}>Вернуться к {url.hostname}</Link>
         </p>
       ),
     },
@@ -78,7 +76,7 @@ export default function ErrorPage() {
         <Link href={signinPageUrl}>
           <Button>Войдите</Button>
         </Link>
-      )
+      ),
     },
     Verification: {
       status: 403,
@@ -86,7 +84,10 @@ export default function ErrorPage() {
       message: (
         <div>
           <p>Ссылка больше недействительна.</p>
-          <p>Возможно, вы уже использовали её или истёк её срок действия. Попробуйте ещё раз!</p>
+          <p>
+            Возможно, вы уже использовали её или истёк её срок действия.
+            Попробуйте ещё раз!
+          </p>
         </div>
       ),
       signin: (

@@ -44,7 +44,7 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_PROJECT_NAME: z.string(),
-    NEXT_PUBLIC_DOMAIN: z.string(),
+    NEXT_PUBLIC_DOMAIN: z.string().url(),
     NEXT_PUBLIC_SUPPORT_EMAIL: z.string().email(),
 
     NEXT_PUBLIC_MAX_KEY_WORDS: z.string()
