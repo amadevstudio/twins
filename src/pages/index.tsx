@@ -2,8 +2,8 @@ import { signIn, useSession } from "next-auth/react";
 
 import { Roboto } from "next/font/google";
 
-import { Button } from "@/components/ui/button-base";
-import { Input } from "@/components/ui/input-base";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { searchUserSchema, searchUserType } from "@/server/api/types/user";
 import { useForm } from "react-hook-form";

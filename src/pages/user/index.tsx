@@ -1,4 +1,4 @@
-import { Input } from "@/components/ui/input-base";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button-base";
+import { Button } from "@/components/ui/button";
 import { queryUserSchema, userSexAllowed } from "@/server/api/types/user";
 import { authOptions } from "@/server/auth";
 import type {

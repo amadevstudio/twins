@@ -9,6 +9,10 @@ import {queryUserSchema, searchUserSchema, searchUserType} from "@/server/api/ty
 import * as userService from "@/server/service/user";
 
 export const user = createTRPCRouter({
+  findByEmail: publicProcedure.input(z.string().email()).query(async ({ctx, input}) => {
+    return await userService.findByEmailAuth(input);
+  }),
+
   findById: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return await userService.findById(input);
   }),

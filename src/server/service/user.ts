@@ -12,6 +12,10 @@ export async function afterCreate(adapterUser: AdapterUser) {
   await userInfoRepo.createByUserId(user!.id);
 }
 
+export async function findByEmailAuth(email: string) {
+  return userRepo.findByEmailAuth(email);
+}
+
 export async function findById(userId: string) {
   return userRepo.findById(userId);
 }

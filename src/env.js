@@ -44,6 +44,7 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_PROJECT_NAME: z.string(),
+    NEXT_PUBLIC_DOMAIN: z.string(),
     NEXT_PUBLIC_SUPPORT_EMAIL: z.string().email(),
 
     NEXT_PUBLIC_MAX_KEY_WORDS: z.string()
@@ -55,6 +56,7 @@ export const env = createEnv({
    */
   runtimeEnv: {
     NEXT_PUBLIC_PROJECT_NAME: process.env.NEXT_PUBLIC_PROJECT_NAME,
+    NEXT_PUBLIC_DOMAIN: process.env.NEXT_PUBLIC_DOMAIN,
     NEXT_PUBLIC_SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
 
     NEXT_PUBLIC_MAX_KEY_WORDS: process.env.NEXT_PUBLIC_MAX_KEY_WORDS,

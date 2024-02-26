@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_PROJECT_NAME: "Twins"
+        NEXT_PUBLIC_DOMAIN: "twins.wrkt.ru"
         NEXT_PUBLIC_SUPPORT_EMAIL: "twins@email"
     working_dir: /app
     networks:
