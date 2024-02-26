@@ -41,6 +41,13 @@ const userFullInfoQuery = {
   },
 };
 
+export async function findByEmailAuth(email: string) {
+  const query = {
+    where: { email: email }
+  }
+  return db.user.findFirst(query);
+}
+
 export async function findById(userId: string) {
   const query = {
     where: { id: userId },

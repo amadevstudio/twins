@@ -6,8 +6,9 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_PROJECT_NAME: "Twins"
-        NEXT_PUBLIC_SUPPORT_EMAIL: "twins@email"
+        NEXT_PUBLIC_PROJECT_NAME: $NEXT_PUBLIC_PROJECT_NAME
+        NEXT_PUBLIC_DOMAIN: $NEXT_PUBLIC_DOMAIN
+        NEXT_PUBLIC_SUPPORT_EMAIL: $NEXT_PUBLIC_SUPPORT_EMAIL
     working_dir: /app
     networks:
       - data-db-network

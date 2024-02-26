@@ -1,5 +1,5 @@
 import { env } from "@/env";
-import { Button } from "@/components/ui/button-base";
+import { Button } from "@/components/ui/button";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
