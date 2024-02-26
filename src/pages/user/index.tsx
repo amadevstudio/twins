@@ -35,7 +35,7 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parse } from "date-fns";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   addictWithDots,
   isDateBad,
@@ -49,6 +49,18 @@ import { serverSideHelper } from "@/pages/api/trpc/[trpc]";
 import { Checkbox } from "@/components/ui/checkbox";
 import * as entitiesI18n from "@/utils/i18n/entities/t";
 import { toast } from "sonner";
+import AvatarEditor from "react-avatar-editor";
+import Dropzone from "react-dropzone";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
@@ -90,6 +102,7 @@ export default function User(
         {userData.data !== undefined && (
           <>
             <ProfilePhotosShow session={session} />
+            <AdditionalPhotosShow />
             <UserInfoShow userData={userData.data} className="mt-10" />
           </>
         )}
@@ -99,20 +112,133 @@ export default function User(
 }
 
 function ProfilePhotosShow({ session }: { session: Session | null }) {
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [scale, setScale] = useState<number>(1.2);
+
   return (
-    <div className="flex flex-col-reverse gap-10 pt-20 md:flex-row">
-      <div className="flex flex-col">
-        <Label htmlFor="profileUploader">Загрузите до 5 своих фотографий</Label>
-        <Input id="profileUploader" type="file" className="flex-1" />
-      </div>
-      <div className="flex">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src="" alt={session?.user?.email ?? ""} />
-          <AvatarFallback>{session?.user?.email?.slice(0, 2)}</AvatarFallback>
-        </Avatar>
-      </div>
+    <div>
+      <Dialog>
+        <DialogTrigger asChild>
+          <div className="flex cursor-pointer flex-col gap-2">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src="" alt={session?.user?.email ?? ""} />
+              <AvatarFallback>
+                {session?.user?.email?.slice(0, 2)}
+              </AvatarFallback>
+            </Avatar>
+            <Button>Выберите фото профиля</Button>
+          </div>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Фото профиля</DialogTitle>
+            <DialogDescription>
+              Выберите и отредактируйте фото профиля. Не забудьте сохранить
+              перед выходом
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <Dropzone
+              onDrop={(dropped) => setAvatar(!!dropped[0] ? dropped[0] : null)}
+              noClick
+              noKeyboard
+            >
+              {({ getRootProps, getInputProps }) => (
+                <Label
+                  {...getRootProps()}
+                  htmlFor="profileUploader"
+                  className="cursor-pointer border-2 p-10 text-center"
+                >
+                  Нажмите или перенесите фото сюда
+                  <Input
+                    {...getInputProps()}
+                    id="profileUploader"
+                    type="file"
+                  />
+                </Label>
+              )}
+            </Dropzone>
+            {avatar && (
+              <div className="flex flex-col gap-4">
+                <AvatarEditor
+                  image={avatar}
+                  width={250}
+                  height={250}
+                  border={50}
+                  color={[255, 255, 255, 0.6]} // RGBA
+                  scale={scale}
+                  rotate={0}
+                  borderRadius={125}
+                />
+                <Slider
+                  onValueChange={(value) => setScale(value[0])}
+                  defaultValue={[scale]}
+                  min={1}
+                  max={2}
+                  step={0.05}
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button type="submit">Сохранить</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+function AdditionalPhotosShow() {
+  const [photos, setPhotos] = useState<(File | null)[]>([]);
+
+  return (
+    <div>
+      <Dialog>
+        <DialogTrigger asChild>
+          <div className="flex cursor-pointer flex-col gap-2">
+            <Button>Загрузите дополнительные фото</Button>
+          </div>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Фото</DialogTitle>
+            <DialogDescription>
+              Загрузите до 5 штук. Не забудьте сохранить
+              перед выходом
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <Dropzone
+              onDrop={(dropped) => setPhotos(dropped)}
+              noClick
+              noKeyboard
+            >
+              {({ getRootProps, getInputProps }) => (
+                <Label
+                  {...getRootProps()}
+                  htmlFor="profileUploader"
+                  className="cursor-pointer border-2 p-10 text-center"
+                >
+                  Нажмите или перенесите фото сюда
+                  <Input
+                    {...getInputProps()}
+                    id="profileUploader"
+                    type="file"
+                    multiple={true}
+                  />
+                </Label>
+              )}
+            </Dropzone>
+            { photos.map(photo => JSON.stringify(photo)) }
+          </div>
+          <DialogFooter>
+            <Button type="submit">Сохранить</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
 }
 
 function UserInfoShow({
@@ -166,7 +292,7 @@ function UserInfoShow({
     defaultValues: getFormValues(),
   });
 
-  const [birthdayDirectInput, setBirthdayDirectInput] = React.useState(
+  const [birthdayDirectInput, setBirthdayDirectInput] = useState(
     userData?.userInfo?.birthday ? showDate(userData.userInfo.birthday) : "",
   );
 
