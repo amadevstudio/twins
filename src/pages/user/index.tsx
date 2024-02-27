@@ -1,12 +1,11 @@
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
-import { z } from "zod";
+import { type z } from "zod";
 import { api } from "@/utils/api";
-import { getServerSession, Session } from "next-auth";
+import { getServerSession, type Session } from "next-auth";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@/server/api/root";
 import {
@@ -25,7 +24,6 @@ import { queryUserSchema, userSexAllowed } from "@/server/api/types/user";
 import { authOptions } from "@/server/auth";
 import type {
   GetServerSidePropsContext,
-  InferGetServerSidePropsType,
 } from "next";
 import {
   Popover,
@@ -75,7 +73,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 }
 
 export default function User(
-  props: InferGetServerSidePropsType<typeof getServerSideProps>,
 ) {
   const { data: session } = useSession();
 
@@ -141,29 +138,9 @@ function UserInfoShow({
       .join(" ");
   };
 
-  function getFormValues() {
-    return {
-      name: userData?.name ?? "",
-      sex:
-        userData?.userInfo?.sex !== "EMPTY" &&
-        userData?.userInfo?.sex &&
-        userSexAllowed.includes(userData.userInfo.sex)
-          ? userData.userInfo.sex
-          : undefined,
-      city: userData?.userInfo?.city ?? "",
-      birthday: userData?.userInfo?.birthday ?? undefined,
-      contacts: userData?.userInfo?.contacts ?? "",
-      keyWords: prepareKeyWordsToShow(userData?.userToKeyWords),
-      additionalInfo: userData?.userInfo?.additionalInfo ?? "",
-      registrationTarget: userData?.userToRegistrationTargets?.map(
-        (utrt) => utrt.registrationTarget.target,
-      ),
-    };
-  }
-
   const form = useForm<z.infer<typeof updateUserSchema>>({
     resolver: zodResolver(updateUserSchema),
-    defaultValues: getFormValues(),
+    // defaultValues: getFormValues(),
   });
 
   const [birthdayDirectInput, setBirthdayDirectInput] = React.useState(
@@ -208,19 +185,31 @@ function UserInfoShow({
   }
 
   const userUpdateMutation = api.user.update.useMutation({
-    async onSuccess(input) {
+    async onSuccess() {
       await context.user.self.invalidate();
-      form.setValue(
-        "keyWords",
-        prepareKeyWordsToShow(userData?.userToKeyWords),
-      );
       toast("Сохранено");
     },
   });
 
   useEffect(() => {
-    form.reset(getFormValues());
-  }, [userData]);
+    form.reset({
+      name: userData?.name ?? "",
+      sex:
+        userData?.userInfo?.sex !== "EMPTY" &&
+        userData?.userInfo?.sex &&
+        userSexAllowed.includes(userData.userInfo.sex)
+          ? userData.userInfo.sex
+          : undefined,
+      city: userData?.userInfo?.city ?? "",
+      birthday: userData?.userInfo?.birthday ?? undefined,
+      contacts: userData?.userInfo?.contacts ?? "",
+      keyWords: prepareKeyWordsToShow(userData?.userToKeyWords),
+      additionalInfo: userData?.userInfo?.additionalInfo ?? "",
+      registrationTarget: userData?.userToRegistrationTargets?.map(
+        (utrt) => utrt.registrationTarget.target,
+      ),
+    });
+  }, [form, userData]);
 
   function onSubmit(data: z.infer<typeof updateUserSchema>) {
     userUpdateMutation.mutate(data);
