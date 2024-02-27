@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "KeyWordSubscriptionStatuses" AS ENUM ('NEW', 'COMPLETED');
+CREATE TYPE "KeyWordsSubscriptionStatuses" AS ENUM ('NEW', 'CANCELED', 'COMPLETED');
 
 -- DropForeignKey
 ALTER TABLE "UserToRegistrationTarget" DROP CONSTRAINT "UserToRegistrationTarget_registrationTargetId_fkey";
@@ -11,7 +11,7 @@ ALTER TABLE "UserToRegistrationTarget" DROP CONSTRAINT "UserToRegistrationTarget
 CREATE TABLE "KeyWordsSubscription" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "status" "KeyWordSubscriptionStatuses" NOT NULL DEFAULT 'NEW',
+    "status" "KeyWordsSubscriptionStatuses" NOT NULL DEFAULT 'NEW',
 
     CONSTRAINT "KeyWordsSubscription_pkey" PRIMARY KEY ("id")
 );
