@@ -101,10 +101,10 @@ export default function User(
 function ProfilePhotosShow({ session }: { session: Session | null }) {
   return (
     <div className="flex flex-col-reverse gap-10 pt-20 md:flex-row">
-      <div className="flex flex-col">
-        <Label htmlFor="profileUploader">Загрузите до 5 своих фотографий</Label>
-        <Input id="profileUploader" type="file" className="flex-1" />
-      </div>
+      {/*<div className="flex flex-col">*/}
+      {/*  <Label htmlFor="profileUploader">Загрузите до 5 своих фотографий</Label>*/}
+      {/*  <Input id="profileUploader" type="file" className="flex-1" />*/}
+      {/*</div>*/}
       <div className="flex">
         <Avatar className="h-16 w-16">
           <AvatarImage src="" alt={session?.user?.email ?? ""} />
