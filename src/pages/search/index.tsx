@@ -1,15 +1,12 @@
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import {
-  queryUserType,
   searchUserPageSize,
   searchUserSchema,
 } from "@/server/api/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 import type { inferRouterOutputs } from "@trpc/server";
@@ -32,13 +29,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import * as entitiesI18n from "@/utils/i18n/entities/t";
-import { age, showDate } from "@/utils/types/date";
+import { age } from "@/utils/types/date";
 import Link from "next/link";
 import SearchForm from "@/components/base/search";
+import { signIn, useSession } from "next-auth/react";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export default function Home() {
+export default function Search() {
+  const { data: session } = useSession();
+
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -68,6 +70,32 @@ export default function Home() {
     { keepPreviousData: true },
   );
 
+  const [subscribedOnSearchQuery, setSubscribedOnSearchQuery] = useState(false);
+
+  const isSubscribedResult = api.searchQuerySubscription.findByQuery.useQuery(searchQuery);
+
+  useEffect(() => {
+    if (isSubscribedResult.data !== undefined) {
+      setSubscribedOnSearchQuery(isSubscribedResult.data !== null);
+    }
+  }, [isSubscribedResult.data])
+
+  const searchSubscriptionMutation =
+    api.searchQuerySubscription.subscribe.useMutation({
+      onSuccess: (_) => {
+        setSubscribedOnSearchQuery(true);
+        toast("Вы подписаны на запрос!");
+      },
+      onError: (error) => {
+        console.error(error);
+        toast("Возникла ошибка");
+      },
+    });
+
+  function subscribeOnSearchQuery() {
+    searchSubscriptionMutation.mutate(searchQuery);
+  }
+
   return (
     <div className="container flex flex-col items-center">
       <SearchForm form={form} onSubmit={onSubmit} />
@@ -79,6 +107,9 @@ export default function Home() {
             currentPage={currentPage}
             data={searchResults.data}
             baseUrl={getBaseUrl(searchQuery)}
+            subscribeOnSearchQuery={subscribeOnSearchQuery}
+            userLogged={session?.user !== undefined}
+            subscribedOnSearchQuery={subscribedOnSearchQuery}
           />
         )}
       </div>
@@ -90,13 +121,17 @@ function SearchResults({
   data,
   currentPage,
   baseUrl,
+  subscribeOnSearchQuery,
+  userLogged,
+  subscribedOnSearchQuery,
 }: {
   data: RouterOutputs["user"]["findByKeyWords"];
   currentPage: number;
   baseUrl: string;
+  subscribeOnSearchQuery: () => void;
+  userLogged: boolean;
+  subscribedOnSearchQuery: boolean;
 }) {
-  // const dataToShow = (userInfo?: queryUserType) => [userInfo?.sex, userInfo.]
-
   return (
     <>
       <div className="flex flex-col gap-5">
@@ -139,12 +174,44 @@ function SearchResults({
       </div>
 
       {data.pagination.total == 0 && (
-        <p>
-          Сейчас на сервисе отсутствуют люди, соответствующие данному запросу,
-          однако они могут появиться уже завтра. Мы можем отправить Вам на email
-          ссылку на профили таких людей, как только они зарегистрируются. Для
-          этого Вам нужно Подписаться на поисковый запрос.
-        </p>
+        <div className="flex flex-col items-center gap-10">
+          <div>
+            Сейчас на сервисе отсутствуют люди, соответствующие данному запросу,
+            однако они могут появиться уже завтра. Мы можем отправить Вам на
+            email ссылку на профили таких людей, как только они
+            зарегистрируются.{" "}
+            <p
+              className={cn(
+                "inline",
+                userLogged && !subscribedOnSearchQuery
+                  ? "cursor-pointer underline"
+                  : "",
+              )}
+              onClick={subscribeOnSearchQuery}
+            >
+              Для этого Вам нужно Подписаться на поисковый запрос.
+            </p>
+          </div>
+          {userLogged && subscribedOnSearchQuery && (
+            <p>Вы подписаны на запрос</p>
+          )}
+          {userLogged && !subscribedOnSearchQuery && (
+            <Button className="w-min" onClick={subscribeOnSearchQuery}>
+              Подписаться на поисковый запрос
+            </Button>
+          )}
+          {!userLogged && (
+            <div className="flex items-center gap-2">
+              <p>Чтобы подписаться на поисковый запрос, вам необходимо</p>
+              <Button
+                className=""
+                onClick={() => signIn(undefined, { callbackUrl: "/user" })}
+              >
+                Войти или создать аккаунт
+              </Button>
+            </div>
+          )}
+        </div>
       )}
 
       <div className="pt-5">

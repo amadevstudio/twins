@@ -25,7 +25,7 @@ export async function findByIdWithInfo(userId: string) {
 }
 
 export async function findByKeyWords(userId: string | undefined, keyWordsData: searchUserType) {
-  const keyWords = processKeyWordsString(keyWordsData.query).slice(0, Number(env.NEXT_PUBLIC_MAX_KEY_WORDS))
+  const keyWords = processKeyWordsString(keyWordsData.query)
   return userRepo.findByKeyWords(userId, keyWords, keyWordsData.page);
 }
 
@@ -62,7 +62,7 @@ export async function updateUserInfo(userId: string, info: queryUserType) {
 
   // KeyWords processing
   // Make
-  const newKeyWords = processKeyWordsString(info.keyWords).slice(0, Number(env.NEXT_PUBLIC_MAX_KEY_WORDS))
+  const newKeyWords = processKeyWordsString(info.keyWords)
   const newKeyWordsCreated = await keyWordRepo.findOrCreateByIds(newKeyWords)
   // To delete
   const keyWordsConnectionsToDelete = user.userToKeyWords.filter(
