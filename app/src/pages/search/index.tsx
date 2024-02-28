@@ -1,12 +1,9 @@
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
-import {
-  searchUserPageSize,
-  searchUserSchema,
-} from "@/server/api/types/user";
+import { searchUserPageSize, searchUserSchema } from "@/server/api/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { api } from "@/utils/api";
 import type { inferRouterOutputs } from "@trpc/server";
@@ -72,13 +69,14 @@ export default function Search() {
 
   const [subscribedOnSearchQuery, setSubscribedOnSearchQuery] = useState(false);
 
-  const isSubscribedResult = api.searchQuerySubscription.findByQuery.useQuery(searchQuery);
+  const isSubscribedResult =
+    api.searchQuerySubscription.findByQuery.useQuery(searchQuery);
 
   useEffect(() => {
     if (isSubscribedResult.data !== undefined) {
       setSubscribedOnSearchQuery(isSubscribedResult.data !== null);
     }
-  }, [isSubscribedResult.data])
+  }, [isSubscribedResult.data]);
 
   const searchSubscriptionMutation =
     api.searchQuerySubscription.subscribe.useMutation({
@@ -87,7 +85,12 @@ export default function Search() {
         toast("Вы подписаны на запрос!");
       },
       onError: (error) => {
-        console.error(error);
+        if (error.message === "Users exists") {
+          toast("Такие пользователи есть, обновите страницу!");
+          return;
+        }
+
+        console.error("!!!!", error);
         toast("Возникла ошибка");
       },
     });
