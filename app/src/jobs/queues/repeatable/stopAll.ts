@@ -11,12 +11,12 @@ await Promise.all(
 
     const repeatableJobs = await queue.getRepeatableJobs();
     await Promise.all(
-      repeatableJobs.map(async (repetable_job) => {
-        console.log(`Removing ${repetable_job.key})`);
+      repeatableJobs.map(async (repeatable_job) => {
+        console.log(`Removing ${repeatable_job.key})`);
 
-        const removed = await queue.removeRepeatableByKey(repetable_job.key);
+        const removed = await queue.removeRepeatableByKey(repeatable_job.key);
 
-        console.log(`Removed ${repetable_job.key}: ${removed}`);
+        console.log(`Removed ${repeatable_job.key}: ${removed}`);
       }),
     );
   }),
