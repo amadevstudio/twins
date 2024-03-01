@@ -10,7 +10,11 @@
     "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "workers:build": "rm -rf ./src/jobs/build && npx tsc --project ./src/jobs/tsconfig.json --outDir ./src/jobs/build",
+    "workers:runRepeatignQueues": "node src/jobs/build/queues/repeatable/run.js",
+    "workers:stopAllRepeatignQueues": "node src/jobs/build/queues/repeatable/stopAll.js",
+    "workers:run:searchQuerySubscription": "node src/jobs/build/workers/searchQuerySubscription.js"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -35,6 +39,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "date-fns": "^3.3.1",
+    "dotenv": "^16.4.5",
     "lucide-react": "^0.323.0",
     "next": "^14.0.4",
     "next-auth": "^4.24.5",

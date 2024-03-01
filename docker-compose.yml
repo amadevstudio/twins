@@ -48,7 +48,7 @@ services:
     restart: on-failure
     volumes:
       - ./redis/redis-data:/var/lib/redis
-    #      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
     networks:
       - storage-network
     ports:

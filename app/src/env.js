@@ -7,6 +7,7 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
+    REDIS_PASSWORD: z.string(),
     DATABASE_URL: z
       .string()
       .url()
@@ -55,14 +56,18 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    NODE_ENV: process.env.NODE_ENV,
+
     NEXT_PUBLIC_PROJECT_NAME: process.env.NEXT_PUBLIC_PROJECT_NAME,
     NEXT_PUBLIC_DOMAIN: process.env.NEXT_PUBLIC_DOMAIN,
     NEXT_PUBLIC_SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
 
     NEXT_PUBLIC_MAX_KEY_WORDS: process.env.NEXT_PUBLIC_MAX_KEY_WORDS,
 
+    REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+
     DATABASE_URL: process.env.DATABASE_URL,
-    NODE_ENV: process.env.NODE_ENV,
+
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_EMAIL_HOST: process.env.NEXTAUTH_EMAIL_HOST,
