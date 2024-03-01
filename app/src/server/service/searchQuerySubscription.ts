@@ -28,3 +28,7 @@ export async function subscribe(userId: string, searchQuery: string) {
 
   return searchQuerySubscriptionRepo.create(userId, newKeyWordsCreated);
 }
+
+export async function findUserIntersection(batch_size = 10000) {
+  return searchQuerySubscriptionRepo.findUserIntersection(batch_size);
+}
