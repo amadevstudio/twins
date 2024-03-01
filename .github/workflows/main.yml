@@ -35,9 +35,11 @@ jobs:
             cd ${{ secrets.PROJECT_PATH }}
             echo "Performing git pull"
             git pull
+
             # Building
             echo "Performing docker compose build"
             docker compose build
+
             # Restarting
             echo "Performing stop, up"
             docker compose stop app

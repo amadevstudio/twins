@@ -7,7 +7,13 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
+    NODE_ENV: z
+        .enum(["development", "test", "production"])
+        .default("development"),
+
+    REDIS_SERVER: z.string(),
     REDIS_PASSWORD: z.string(),
+
     DATABASE_URL: z
       .string()
       .url()
@@ -15,9 +21,7 @@ export const env = createEnv({
         (str) => !str.includes("YOUR_MYSQL_URL_HERE"),
         "You forgot to change the default URL"
       ),
-    NODE_ENV: z
-      .enum(["development", "test", "production"])
-      .default("development"),
+
     NEXTAUTH_SECRET:
       process.env.NODE_ENV === "production"
         ? z.string()
@@ -64,6 +68,7 @@ export const env = createEnv({
 
     NEXT_PUBLIC_MAX_KEY_WORDS: process.env.NEXT_PUBLIC_MAX_KEY_WORDS,
 
+    REDIS_SERVER: process.env.REDIS_SERVER,
     REDIS_PASSWORD: process.env.REDIS_PASSWORD,
 
     DATABASE_URL: process.env.DATABASE_URL,

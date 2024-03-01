@@ -33,10 +33,13 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
+RUN npm run workers:build
+
 ##### RUNNER
 
 FROM --platform=linux/amd64 node:18.17-alpine AS runner
 WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
@@ -52,6 +55,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 COPY --from=builder /app/prisma/schema.prisma ./
+
+COPY --from=builder /app/src/jobs/build ./src/jobs/build
 
 COPY --from=builder --chown=nextjs:nextjs /app/entrypoint.sh ./
 RUN chmod u+x ./entrypoint.sh

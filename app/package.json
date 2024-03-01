@@ -12,9 +12,9 @@
     "lint": "next lint",
     "start": "next start",
     "workers:build": "rm -rf ./src/jobs/build && npx tsc --project ./src/jobs/tsconfig.json --outDir ./src/jobs/build",
-    "workers:runRepeatignQueues": "node src/jobs/build/queues/repeatable/run.js",
-    "workers:stopAllRepeatignQueues": "node src/jobs/build/queues/repeatable/stopAll.js",
-    "workers:run:searchQuerySubscription": "node src/jobs/build/workers/searchQuerySubscription.js"
+    "workers:runRepeatableQueues": "node src/jobs/build/queues/repeatable/run.js",
+    "workers:stopAllRepeatableQueues": "node src/jobs/build/queues/repeatable/stopAll.js",
+    "workers:worker:searchQuerySubscription": "npx pm2 start src/jobs/build/workers/searchQuerySubscription.js || npx pm2 reload all"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -48,6 +48,7 @@
     "next-auth": "^4.24.5",
     "next-themes": "^0.2.1",
     "nodemailer": "^6.9.10",
+    "pm2": "^5.3.1",
     "react": "18.2.0",
     "react-day-picker": "^8.10.0",
     "react-dom": "18.2.0",
