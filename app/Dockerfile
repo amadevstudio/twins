@@ -42,6 +42,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 
 ENV NODE_ENV production
+ENV HOSTNAME 0.0.0.0
+
 ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs
