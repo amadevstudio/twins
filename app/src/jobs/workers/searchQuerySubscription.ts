@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 
-import * as redis_conf from "../redis_conf.js";
+import * as redis_conf from "../redis_conf";
+import { findUserIntersection } from "@/server/service/searchQuerySubscription";
 
 const worker = new Worker(
   "searchQuerySubscription",

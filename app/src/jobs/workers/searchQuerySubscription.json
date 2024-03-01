@@ -1,0 +1,10 @@
+{
+  "apps": [
+    {
+      "name": "SearchQuerySubscription",
+      "script": "src/jobs/build/jobs/workers/searchQuerySubscription.js",
+      "autorestart": true,
+      "node_args": "--experimental-specifier-resolution=node"
+    }
+  ]
+}

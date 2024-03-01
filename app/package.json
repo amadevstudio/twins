@@ -11,10 +11,10 @@
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start",
-    "workers:build": "rm -rf ./src/jobs/build && npx tsc --project ./src/jobs/tsconfig.json --outDir ./src/jobs/build",
-    "workers:runRepeatableQueues": "node src/jobs/build/queues/repeatable/run.js",
-    "workers:stopAllRepeatableQueues": "node src/jobs/build/queues/repeatable/stopAll.js",
-    "workers:worker:searchQuerySubscription": "npx pm2 start src/jobs/build/workers/searchQuerySubscription.js || npx pm2 reload all"
+    "workers:build": "rm -rf ./src/jobs/build && npx tsc --project ./src/jobs/tsconfig.json --outDir ./src/jobs/build && npx tsc-alias -p ./src/jobs/tsconfig.json",
+      "workers:runRepeatableQueues": "node --experimental-specifier-resolution=node src/jobs/build/jobs/queues/repeatable/run.js",
+    "workers:stopAllRepeatableQueues": "node --experimental-specifier-resolution=node src/jobs/build/jobs/queues/repeatable/stopAll.js",
+    "workers:worker:searchQuerySubscription": "npx pm2 startOrReload src/jobs/workers/searchQuerySubscription.json"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -57,6 +57,7 @@
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
+    "tsc-alias": "^1.8.8",
     "zod": "^3.22.4"
   },
   "devDependencies": {
