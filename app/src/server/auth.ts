@@ -97,7 +97,7 @@ export const authOptions: NextAuthOptions = {
     EmailProvider({
       server: {
         host: env.NEXTAUTH_EMAIL_HOST,
-        port: env.NEXTAUTH_EMAIL_PORT,
+        port: Number(env.NEXTAUTH_EMAIL_PORT),
         auth: {
           user: env.NEXTAUTH_EMAIL_USER,
           pass: env.NEXTAUTH_EMAIL_PASSWORD,

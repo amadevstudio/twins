@@ -12,7 +12,7 @@
     "lint": "next lint",
     "start": "next start",
     "workers:build": "rm -rf ./src/jobs/build && npx tsc --project ./src/jobs/tsconfig.json --outDir ./src/jobs/build && npx tsc-alias -p ./src/jobs/tsconfig.json",
-      "workers:runRepeatableQueues": "node --experimental-specifier-resolution=node src/jobs/build/jobs/queues/repeatable/run.js",
+    "workers:runRepeatableQueues": "node --experimental-specifier-resolution=node src/jobs/build/jobs/queues/repeatable/run.js",
     "workers:stopAllRepeatableQueues": "node --experimental-specifier-resolution=node src/jobs/build/jobs/queues/repeatable/stopAll.js",
     "workers:worker:searchQuerySubscription": "npx pm2 startOrReload src/jobs/workers/searchQuerySubscription.json"
   },

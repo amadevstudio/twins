@@ -1,5 +1,34 @@
-import { KeyWord, KeyWordsSubscription } from "@prisma/client";
+import {
+  KeyWord,
+  KeyWordsSubscription,
+  KeyWordsSubscriptionStatuses,
+} from "@prisma/client";
 import { db } from "@/server/db";
+
+export async function findById(id: string) {
+  return db.keyWordsSubscription.findFirst({
+    where: { id },
+    include: {
+      keyWordsSubscriptionToKeyWords: {
+        include: {
+          keyWord: true,
+        },
+      },
+    },
+  });
+}
+
+export async function setStatus(
+  id: string,
+  status: KeyWordsSubscriptionStatuses,
+) {
+  return db.keyWordsSubscription.update({
+    where: { id },
+    data: {
+      status,
+    },
+  });
+}
 
 export async function findByKeyWords(userId: string, keyWords: KeyWord[]) {
   if (keyWords.length === 0) {

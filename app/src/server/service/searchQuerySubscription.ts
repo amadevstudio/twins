@@ -9,6 +9,14 @@ export async function findByQuery(userId: string, searchQuery: string) {
   return searchQuerySubscriptionRepo.findByKeyWords(userId, newKeyWordsCreated);
 }
 
+export async function findById(id: string) {
+  return searchQuerySubscriptionRepo.findById(id);
+}
+
+export async function setStatus(id: string, status: "NEW" | "COMPLETED" | "CANCELED") {
+  return searchQuerySubscriptionRepo.setStatus(id, status);
+}
+
 export async function subscribe(userId: string, searchQuery: string) {
   const keyWords = processKeyWordsString(searchQuery);
   const newKeyWordsCreated = await keyWordRepo.findOrCreateByIds(keyWords);
