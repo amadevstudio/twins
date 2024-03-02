@@ -33,7 +33,15 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
+RUN ls -la /app
+RUN ls -la /app/.next
+RUN ls -la /app/.next/static
+
 RUN npm run workers:build
+
+RUN ls -la /app
+RUN ls -la /app/.next
+RUN ls -la /app/.next/static
 
 ##### RUNNER
 
