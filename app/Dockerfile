@@ -59,6 +59,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma/schema.prisma ./
 
 COPY --from=builder /app/src/jobs/build ./src/jobs/build
+COPY --from=builder /app/src/jobs/workers/pm2 ./src/jobs/workers/pm2
 
 COPY --from=builder --chown=nextjs:nextjs /app/entrypoint.sh ./
 RUN chmod u+x ./entrypoint.sh
