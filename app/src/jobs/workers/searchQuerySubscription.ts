@@ -29,10 +29,14 @@ const sendMailWorker = new Worker(
     }
 
     const searchKeyWords = subscription.keyWordsSubscriptionToKeyWords
-      .map((kwstkw) => kwstkw.keyWord.keyWord)
+      .map((kwstkw: { keyWord: { keyWord: string } }) => kwstkw.keyWord.keyWord)
       .join(" ");
 
-    await searchQuerySubscriptionMailer(user.email, candidate.id, searchKeyWords);
+    await searchQuerySubscriptionMailer(
+      user.email,
+      candidate.id,
+      searchKeyWords,
+    );
 
     await searchQueryService.setStatus(subscription.id, "COMPLETED");
   },
