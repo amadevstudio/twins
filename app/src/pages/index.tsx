@@ -55,7 +55,7 @@ export default function Home() {
         <Link
           className="text-center"
           target="_blank"
-          href="https://google.com/search?q=agreement"
+          href="/docs/agreement_and_confidentiality.pdf"
         >
           Пользовательское соглашение и политика конфиденциальности
         </Link>
