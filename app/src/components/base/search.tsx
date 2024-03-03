@@ -17,7 +17,10 @@ export default function SearchForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex w-full flex-col items-start gap-5 md:flex-row"
+        className="
+          flex w-full flex-col items-center gap-5
+          md:flex-row md:items-start
+        "
       >
         <FormField
           control={form.control}
