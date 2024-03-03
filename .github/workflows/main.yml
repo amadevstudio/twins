@@ -31,6 +31,9 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
+            # Remove unused docker artifacts
+            docker system prune -f
+            
             # Pulling
             cd ${{ secrets.PROJECT_PATH }}
             echo "Performing git pull"
