@@ -69,8 +69,12 @@ export default function Search() {
 
   const [subscribedOnSearchQuery, setSubscribedOnSearchQuery] = useState(false);
 
-  const isSubscribedResult =
-    api.searchQuerySubscription.findByQuery.useQuery(searchQuery);
+  const isSubscribedResult = api.searchQuerySubscription.findByQuery.useQuery(
+    searchQuery,
+    {
+      enabled: session?.user?.id !== undefined,
+    },
+  );
 
   useEffect(() => {
     if (isSubscribedResult.data !== undefined) {
@@ -183,17 +187,19 @@ function SearchResults({
             однако они могут появиться уже завтра. Мы можем отправить Вам на
             email ссылку на профили таких людей, как только они
             зарегистрируются.{" "}
-            <p
-              className={cn(
-                "inline",
-                userLogged && !subscribedOnSearchQuery
-                  ? "cursor-pointer underline"
-                  : "",
-              )}
-              onClick={subscribeOnSearchQuery}
-            >
-              Для этого Вам нужно Подписаться на поисковый запрос.
-            </p>
+            {userLogged && !subscribedOnSearchQuery && (
+              <p
+                className="inline cursor-pointer underline"
+                onClick={subscribeOnSearchQuery}
+              >
+                Для этого Вам нужно Подписаться на поисковый запрос.
+              </p>
+            )}
+            {(!userLogged || subscribedOnSearchQuery) && (
+              <p className="inline">
+                Для этого Вам нужно Подписаться на поисковый запрос.
+              </p>
+            )}
           </div>
           {userLogged && subscribedOnSearchQuery && (
             <p>Вы подписаны на запрос</p>
