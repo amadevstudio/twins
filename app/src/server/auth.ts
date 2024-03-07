@@ -13,7 +13,7 @@ import { createTransport } from "nodemailer";
 import { env } from "@/env";
 import { db } from "@/server/db";
 
-import { afterCreate } from "@/server/service/user";
+import * as userService from "@/server/service/user";
 import { html, text } from "@/pages/api/auth/magic-link";
 
 /**
@@ -81,7 +81,8 @@ export const authOptions: NextAuthOptions = {
     createUser: async (user) => {
       const createdUser = await prismaAdapter.createUser!(user);
 
-      await afterCreate(createdUser);
+      const userRow = await userService.findById(createdUser.id);
+      await userService.afterCreate(userRow);
 
       return createdUser;
     },
@@ -120,6 +121,7 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: env.NEXTAUTH_GOOGLE_ID,
       clientSecret: env.NEXTAUTH_GOOGLE_SECRET,
+      allowDangerousEmailAccountLinking: true
     }),
     /**
      * ...add more providers here.

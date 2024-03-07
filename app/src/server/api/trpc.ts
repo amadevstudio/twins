@@ -15,6 +15,7 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
+import { NextApiRequest, NextApiResponse } from "next";
 
 /**
  * 1. CONTEXT
@@ -26,6 +27,8 @@ import { db } from "@/server/db";
 
 interface CreateContextOptions {
   session: Session | null;
+  req?: NextApiRequest;
+  res?: NextApiResponse;
 }
 
 /**
@@ -42,6 +45,8 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     db,
+    req: opts.req,
+    res: opts.res,
   };
 };
 
@@ -59,6 +64,8 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
   return createInnerTRPCContext({
     session,
+    req,
+    res,
   });
 };
 
@@ -69,6 +76,8 @@ export async function createContextInner(opts?: CreateInnerContextOptions) {
   return {
     db,
     session: opts?.session ?? null,
+    req: undefined,
+    res: undefined,
   };
 }
 

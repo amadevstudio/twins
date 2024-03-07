@@ -41,7 +41,7 @@ const userFullInfoQuery = {
   },
 };
 
-export async function findByEmailAuth(email: string) {
+export async function findByEmail(email: string) {
   const query = {
     where: { email: email }
   }
@@ -143,6 +143,14 @@ export async function findByKeyWords(
 }
 
 // Dangerous
+
+export async function createIncompleteByEmail(email: string) {
+  return db.user.create({
+    data: {
+      email: email,
+    }
+  })
+}
 
 export async function updateUserInfo(userId: string, info: queryUserType) {
   return db.user.update({

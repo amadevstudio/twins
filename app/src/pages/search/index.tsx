@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { type z } from "zod";
+import { z } from "zod";
 import { searchUserPageSize, searchUserSchema } from "@/server/api/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,16 @@ import { signIn, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ComponentChildren } from "preact";
+import { env } from "@/env";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { emailSchema } from "@/server/api/types/searchQuery";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
@@ -144,7 +154,9 @@ function SearchResults({
           {session?.user !== undefined && (
             <UserSubscribeAction searchQuery={searchQuery} />
           )}
-          {session?.user === undefined && <AnonSubscribeAction />}
+          {session?.user === undefined && (
+            <AnonSubscribeAction searchQuery={searchQuery} />
+          )}
         </>
       )}
 
@@ -224,7 +236,51 @@ function UserSubscribeAction({ searchQuery }: { searchQuery: string }) {
   );
 }
 
-function AnonSubscribeAction() {
+function AnonSubscribeAction({ searchQuery }: { searchQuery: string }) {
+  const formSchema = z.object({ email: emailSchema });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    values: {
+      email: "",
+    },
+  });
+
+  const [subscribedOnSearchQuery, setSubscribedOnSearchQuery] = useState(false);
+
+  const isSubscribedResult =
+    api.searchQuerySubscription.findByQueryAnon.useQuery(searchQuery);
+
+  useEffect(() => {
+    if (isSubscribedResult.data !== undefined) {
+      setSubscribedOnSearchQuery(isSubscribedResult.data !== null);
+    }
+  }, [isSubscribedResult.data]);
+
+  const searchSubscriptionMutation =
+    api.searchQuerySubscription.subscribeAnon.useMutation({
+      onSuccess: (_) => {
+        setSubscribedOnSearchQuery(true);
+        toast("Вы подписаны на запрос!");
+      },
+      onError: (error) => {
+        if (error.message === "Users exists") {
+          toast("Такие пользователи есть, обновите страницу!");
+          return;
+        }
+
+        console.error(error);
+        toast("Возникла ошибка");
+      },
+    });
+
+  function onSubmit(data: z.infer<typeof formSchema>) {
+    searchSubscriptionMutation.mutate({
+      email: data.email,
+      query: searchQuery,
+    });
+  }
+
   return (
     <div className="flex flex-col items-center gap-10">
       <div>
@@ -236,13 +292,26 @@ function AnonSubscribeAction() {
         </p>
       </div>
       <div className="flex items-center gap-2">
-        <p>Чтобы подписаться на поисковый запрос, вам необходимо</p>
-        <Button
-          className=""
-          onClick={() => signIn(undefined, { callbackUrl: "/user" })}
-        >
-          Подписаться
-        </Button>
+        {!subscribedOnSearchQuery && (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-2">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input {...field} placeholder="email@example.ru" />
+                    </FormControl>
+                    <FormMessage defaultError="Введите электронную почту" />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit">Подписаться</Button>
+            </form>
+          </Form>
+        )}
+        {subscribedOnSearchQuery && <p>Вы подписаны на запрос</p>}
       </div>
     </div>
   );

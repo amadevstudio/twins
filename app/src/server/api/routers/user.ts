@@ -4,14 +4,20 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { z } from "zod";
-import {queryUserSchema, searchUserSchema, searchUserType} from "@/server/api/types/user";
+import {
+  queryUserSchema,
+  searchUserSchema,
+  searchUserType,
+} from "@/server/api/types/user";
 
 import * as userService from "@/server/service/user";
 
 export const user = createTRPCRouter({
-  findByEmail: publicProcedure.input(z.string().email()).query(async ({ctx, input}) => {
-    return await userService.findByEmailAuth(input);
-  }),
+  findByEmail: publicProcedure
+    .input(z.string().email())
+    .query(async ({ ctx, input }) => {
+      return await userService.findByEmail(input);
+    }),
 
   findById: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     return await userService.findById(input);
