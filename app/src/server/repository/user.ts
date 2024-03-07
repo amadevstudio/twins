@@ -144,14 +144,6 @@ export async function findByKeyWords(
 
 // Dangerous
 
-export async function createIncompleteByEmail(email: string) {
-  return db.user.create({
-    data: {
-      email: email,
-    }
-  })
-}
-
 export async function updateUserInfo(userId: string, info: queryUserType) {
   return db.user.update({
     ...{

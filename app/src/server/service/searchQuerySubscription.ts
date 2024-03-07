@@ -5,7 +5,9 @@ import * as userRepo from "@/server/repository/user";
 import { afterCreate } from "@/server/service/user";
 import { NextApiRequest, NextApiResponse } from "next";
 import { setCookie } from "@/utils/cookies";
-import {KeyWordsSubscriptionStatuses} from "@prisma/client";
+import { KeyWordsSubscriptionStatuses } from "@prisma/client";
+import { prismaAdapter } from "@/server/auth";
+import {Adapter, AdapterUser} from "next-auth/adapters";
 
 export async function findByQuery(userId: string, searchQuery: string) {
   const keyWords = processKeyWordsString(searchQuery);
@@ -73,12 +75,22 @@ export async function subscribeAnon(
       return userByEmail;
     }
 
-    const user = await userRepo.createIncompleteByEmail(email);
-    await afterCreate(user);
-    return user;
+    // const user = await userRepo.createIncompleteByEmail(email);
+    // await afterCreate(user);
+    const user: AdapterUser = await prismaAdapter.createUser!({
+      email: email,
+      emailVerified: null,
+    });
+
+    return userRepo.findById(user.id);
   }
 
   const user = await anonUser();
+  if (user === null) {
+    throw new Error("Can't create user");
+  }
+  await afterCreate(user);
+
   setCookie(res, "anonUserId", user.id);
 
   await subscribe(user.id, searchQuery);

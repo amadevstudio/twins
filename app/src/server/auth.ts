@@ -37,7 +37,7 @@ declare module "next-auth" {
   // }
 }
 
-const prismaAdapter = PrismaAdapter(db);
+export const prismaAdapter = PrismaAdapter(db);
 
 async function sendVerificationRequest(params: {
   identifier: string;

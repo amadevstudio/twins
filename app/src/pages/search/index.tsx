@@ -264,11 +264,6 @@ function AnonSubscribeAction({ searchQuery }: { searchQuery: string }) {
         toast("Вы подписаны на запрос!");
       },
       onError: (error) => {
-        if (error.message === "Users exists") {
-          toast("Такие пользователи есть, обновите страницу!");
-          return;
-        }
-
         console.error(error);
         toast("Возникла ошибка");
       },
