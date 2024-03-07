@@ -10,12 +10,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 
 export default function SignIn() {
-  const [email, setEmail] = useState("");
-
-  const emailProvider = {
-    name: "emaik",
-  };
-
   const providers = [
     {
       name: "google",

@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { type z } from "zod";
+import { z } from "zod";
 import { searchUserPageSize, searchUserSchema } from "@/server/api/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -32,12 +32,21 @@ import SearchForm from "@/components/base/search";
 import { signIn, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { ComponentChildren } from "preact";
+import { env } from "@/env";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { emailSchema } from "@/server/api/types/searchQuery";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export default function Search() {
-  const { data: session } = useSession();
-
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -67,42 +76,6 @@ export default function Search() {
     { keepPreviousData: true },
   );
 
-  const [subscribedOnSearchQuery, setSubscribedOnSearchQuery] = useState(false);
-
-  const isSubscribedResult = api.searchQuerySubscription.findByQuery.useQuery(
-    searchQuery,
-    {
-      enabled: session?.user?.id !== undefined,
-    },
-  );
-
-  useEffect(() => {
-    if (isSubscribedResult.data !== undefined) {
-      setSubscribedOnSearchQuery(isSubscribedResult.data !== null);
-    }
-  }, [isSubscribedResult.data]);
-
-  const searchSubscriptionMutation =
-    api.searchQuerySubscription.subscribe.useMutation({
-      onSuccess: (_) => {
-        setSubscribedOnSearchQuery(true);
-        toast("Вы подписаны на запрос!");
-      },
-      onError: (error) => {
-        if (error.message === "Users exists") {
-          toast("Такие пользователи есть, обновите страницу!");
-          return;
-        }
-
-        console.error("!!!!", error);
-        toast("Возникла ошибка");
-      },
-    });
-
-  function subscribeOnSearchQuery() {
-    searchSubscriptionMutation.mutate(searchQuery);
-  }
-
   return (
     <div className="container flex flex-col items-center">
       <SearchForm form={form} onSubmit={onSubmit} />
@@ -114,9 +87,7 @@ export default function Search() {
             currentPage={currentPage}
             data={searchResults.data}
             baseUrl={getBaseUrl(searchQuery)}
-            subscribeOnSearchQuery={subscribeOnSearchQuery}
-            userLogged={session?.user !== undefined}
-            subscribedOnSearchQuery={subscribedOnSearchQuery}
+            searchQuery={searchQuery}
           />
         )}
       </div>
@@ -128,17 +99,15 @@ function SearchResults({
   data,
   currentPage,
   baseUrl,
-  subscribeOnSearchQuery,
-  userLogged,
-  subscribedOnSearchQuery,
+  searchQuery,
 }: {
   data: RouterOutputs["user"]["findByKeyWords"];
   currentPage: number;
   baseUrl: string;
-  subscribeOnSearchQuery: () => void;
-  userLogged: boolean;
-  subscribedOnSearchQuery: boolean;
+  searchQuery: string;
 }) {
+  const { data: session } = useSession();
+
   return (
     <>
       <div className="flex flex-col gap-5">
@@ -181,46 +150,14 @@ function SearchResults({
       </div>
 
       {data.pagination.total == 0 && (
-        <div className="flex flex-col items-center gap-10">
-          <div>
-            Сейчас на сервисе отсутствуют люди, соответствующие данному запросу,
-            однако они могут появиться уже завтра. Мы можем отправить Вам на
-            email ссылку на профили таких людей, как только они
-            зарегистрируются.{" "}
-            {userLogged && !subscribedOnSearchQuery && (
-              <p
-                className="inline cursor-pointer underline"
-                onClick={subscribeOnSearchQuery}
-              >
-                Для этого Вам нужно Подписаться на поисковый запрос.
-              </p>
-            )}
-            {(!userLogged || subscribedOnSearchQuery) && (
-              <p className="inline">
-                Для этого Вам нужно Подписаться на поисковый запрос.
-              </p>
-            )}
-          </div>
-          {userLogged && subscribedOnSearchQuery && (
-            <p>Вы подписаны на запрос</p>
+        <>
+          {session?.user !== undefined && (
+            <UserSubscribeAction searchQuery={searchQuery} />
           )}
-          {userLogged && !subscribedOnSearchQuery && (
-            <Button className="w-min" onClick={subscribeOnSearchQuery}>
-              Подписаться на поисковый запрос
-            </Button>
+          {session?.user === undefined && (
+            <AnonSubscribeAction searchQuery={searchQuery} />
           )}
-          {!userLogged && (
-            <div className="flex items-center gap-2">
-              <p>Чтобы подписаться на поисковый запрос, вам необходимо</p>
-              <Button
-                className=""
-                onClick={() => signIn(undefined, { callbackUrl: "/user" })}
-              >
-                Войти или создать аккаунт
-              </Button>
-            </div>
-          )}
-        </div>
+        </>
       )}
 
       <div className="pt-5">
@@ -233,6 +170,145 @@ function SearchResults({
         />
       </div>
     </>
+  );
+}
+
+function UserSubscribeAction({ searchQuery }: { searchQuery: string }) {
+  const [subscribedOnSearchQuery, setSubscribedOnSearchQuery] = useState(false);
+
+  const isSubscribedResult =
+    api.searchQuerySubscription.findByQuery.useQuery(searchQuery);
+
+  useEffect(() => {
+    if (isSubscribedResult.data !== undefined) {
+      setSubscribedOnSearchQuery(isSubscribedResult.data !== null);
+    }
+  }, [isSubscribedResult.data]);
+
+  const searchSubscriptionMutation =
+    api.searchQuerySubscription.subscribe.useMutation({
+      onSuccess: (_) => {
+        setSubscribedOnSearchQuery(true);
+        toast("Вы подписаны на запрос!");
+      },
+      onError: (error) => {
+        if (error.message === "Users exists") {
+          toast("Такие пользователи есть, обновите страницу!");
+          return;
+        }
+
+        console.error(error);
+        toast("Возникла ошибка");
+      },
+    });
+
+  function subscribeOnSearchQuery() {
+    searchSubscriptionMutation.mutate(searchQuery);
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-10">
+      <div>
+        Сейчас на сервисе отсутствуют люди, соответствующие данному запросу,
+        однако они могут появиться уже завтра. Мы можем отправить Вам на email
+        ссылку на профили таких людей, как только они зарегистрируются.{" "}
+        {!subscribedOnSearchQuery && (
+          <p
+            className="inline cursor-pointer underline"
+            onClick={subscribeOnSearchQuery}
+          >
+            Для этого Вам нужно Подписаться на поисковый запрос.
+          </p>
+        )}
+        {subscribedOnSearchQuery && (
+          <p className="inline">
+            Для этого Вам нужно Подписаться на поисковый запрос.
+          </p>
+        )}
+      </div>
+      {subscribedOnSearchQuery && <p>Вы подписаны на запрос</p>}
+      {!subscribedOnSearchQuery && (
+        <Button className="w-min" onClick={subscribeOnSearchQuery}>
+          Подписаться на поисковый запрос
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function AnonSubscribeAction({ searchQuery }: { searchQuery: string }) {
+  const formSchema = z.object({ email: emailSchema });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    values: {
+      email: "",
+    },
+  });
+
+  const [subscribedOnSearchQuery, setSubscribedOnSearchQuery] = useState(false);
+
+  const isSubscribedResult =
+    api.searchQuerySubscription.findByQueryAnon.useQuery(searchQuery);
+
+  useEffect(() => {
+    if (isSubscribedResult.data !== undefined) {
+      setSubscribedOnSearchQuery(isSubscribedResult.data !== null);
+    }
+  }, [isSubscribedResult.data]);
+
+  const searchSubscriptionMutation =
+    api.searchQuerySubscription.subscribeAnon.useMutation({
+      onSuccess: (_) => {
+        setSubscribedOnSearchQuery(true);
+        toast("Вы подписаны на запрос!");
+      },
+      onError: (error) => {
+        console.error(error);
+        toast("Возникла ошибка");
+      },
+    });
+
+  function onSubmit(data: z.infer<typeof formSchema>) {
+    searchSubscriptionMutation.mutate({
+      email: data.email,
+      query: searchQuery,
+    });
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-10">
+      <div>
+        Сейчас на сервисе отсутствуют люди, соответствующие данному запросу,
+        однако они могут появиться уже завтра. Мы можем отправить Вам на email
+        ссылку на профили таких людей, как только они зарегистрируются.{" "}
+        <p className="inline">
+          Для этого Вам нужно Подписаться на поисковый запрос.
+        </p>
+      </div>
+      <div className="flex items-center gap-2">
+        {!subscribedOnSearchQuery && (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-2">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input {...field} placeholder="email@example.ru" />
+                    </FormControl>
+                    <FormMessage defaultError="Введите электронную почту" />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit">Подписаться</Button>
+            </form>
+          </Form>
+        )}
+        {subscribedOnSearchQuery && <p>Вы подписаны на запрос</p>}
+      </div>
+    </div>
   );
 }
 

@@ -6,14 +6,18 @@ import * as registrationTargetRepo from "@/server/repository/registrationTarget"
 import * as keyWordRepo from "@/server/repository/keyWord";
 import {processKeyWordsString} from "@/server/service/keyWord";
 import { env } from "@/env";
+import {User} from "@prisma/client";
 
-export async function afterCreate(adapterUser: AdapterUser) {
-  const user = await userRepo.findById(adapterUser.id);
-  await userInfoRepo.createByUserId(user!.id);
+export async function afterCreate(user: User | null) {
+  if (user === null) {
+    return;
+  }
+
+  await userInfoRepo.createByUserId(user.id);
 }
 
-export async function findByEmailAuth(email: string) {
-  return userRepo.findByEmailAuth(email);
+export async function findByEmail(email: string) {
+  return userRepo.findByEmail(email);
 }
 
 export async function findById(userId: string) {

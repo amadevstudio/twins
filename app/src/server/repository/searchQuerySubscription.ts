@@ -30,7 +30,11 @@ export async function setStatus(
   });
 }
 
-export async function findByKeyWords(userId: string, keyWords: KeyWord[]) {
+export async function findByKeyWords(
+  userId: string,
+  keyWords: KeyWord[],
+  status: KeyWordsSubscriptionStatuses | undefined = undefined,
+) {
   if (keyWords.length === 0) {
     return null;
   }
@@ -54,6 +58,7 @@ export async function findByKeyWords(userId: string, keyWords: KeyWord[]) {
             SELECT COUNT(*) FROM "KeyWordsSubscriptionToKeyWord" AS x WHERE x."keyWordSubscriptionId" = kws."id"
         )
         AND COUNT(kwstkw."keyWordId") = ${keyWords.length}
+        ${status === undefined ? "" : `AND STATUS = '${status}'`}
   `,
     ...queryParams,
   );
