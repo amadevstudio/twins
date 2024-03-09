@@ -1,6 +1,6 @@
 import { env } from "@/env";
 import { Button } from "@/components/ui/button";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "@/utils/auth/auth";
 import Link from "next/link";
 
 export default function Header() {

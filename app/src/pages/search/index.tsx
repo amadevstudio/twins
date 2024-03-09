@@ -29,7 +29,7 @@ import * as entitiesI18n from "@/utils/i18n/entities/t";
 import { age } from "@/utils/types/date";
 import Link from "next/link";
 import SearchForm from "@/components/base/search";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, useSession } from "@/utils/auth/auth";
 import { toast } from "sonner";
 import {
   Form,
