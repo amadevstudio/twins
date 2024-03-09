@@ -4,9 +4,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
-import { z } from "zod";
+import { type z } from "zod";
 import { api } from "@/utils/api";
-import { getServerSession, Session } from "next-auth";
+import { getServerSession, type Session } from "next-auth";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@/server/api/root";
 import {
@@ -35,7 +35,7 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parse } from "date-fns";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   addictWithDots,
   isDateBad,
@@ -61,6 +61,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
+import * as query from "@/utils/query/query";
+import { AxiosError } from "axios";
+import { constants } from "@/constants";
+import { Progress } from "@/components/ui/progress";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
@@ -101,8 +105,8 @@ export default function User(
       <div className="flex flex-col">
         {userData.data !== undefined && (
           <>
-            <ProfilePhotosShow session={session} />
-            <AdditionalPhotosShow />
+            <ProfilePhotosShow userData={userData.data} />
+            {/*<AdditionalPhotosShow />*/}
             <UserInfoShow userData={userData.data} className="mt-10" />
           </>
         )}
@@ -111,9 +115,80 @@ export default function User(
   );
 }
 
-function ProfilePhotosShow({ session }: { session: Session | null }) {
+function ProfilePhotosShow({
+  userData,
+}: {
+  userData: RouterOutput["user"]["self"];
+}) {
+  const userAvatar = userData?.userImages?.filter((image) => image.isAvatar)[0];
+
   const [avatar, setAvatar] = useState<File | null>(null);
   const [scale, setScale] = useState<number>(1.2);
+
+  const avatarEditor = useRef<AvatarEditor>(null);
+
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  async function uploadAvatar() {
+    if (!avatarEditor.current) {
+      return;
+    }
+
+    const dataUrl = avatarEditor.current.getImage().toDataURL();
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+
+    const formData = new FormData();
+
+    formData.append("image", blob);
+
+    setUploadProgress(0);
+
+    const response = await query
+      .post("/api/user/uploadAvatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total === undefined) {
+            return;
+          }
+
+          const progress = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          );
+          console.log(`Upload Progress: ${progress}%`);
+        },
+      })
+      .catch(function (error: query.error) {
+        if (error.response) {
+          if (error.response.status === 413) {
+            toast(
+              `Слишком большой файл, допустимо ${constants.MAX_IMAGE_SIZE_MB}Мб`,
+            );
+          } else if (error.response.status == 401) {
+            toast("Для этого действия надо ввойти в аккаунт");
+          } else {
+            toast("Возникла ошибка, свяжитесь с поддержкой");
+          }
+          console.log(error.response);
+        } else if (error.request) {
+          toast("Возникла ошибка, свяжитесь с поддержкой");
+          console.log(error.request);
+        } else {
+          toast("Возникла ошибка, свяжитесь с поддержкой");
+          console.log(error.message);
+        }
+      });
+
+    setUploadProgress(100);
+
+    if (response === undefined) {
+      return;
+    }
+
+    toast("Загружено!");
+  }
 
   return (
     <div>
@@ -121,125 +196,146 @@ function ProfilePhotosShow({ session }: { session: Session | null }) {
         <DialogTrigger asChild>
           <div className="flex cursor-pointer flex-col gap-2">
             <Avatar className="h-16 w-16">
-              <AvatarImage src="" alt={session?.user?.email ?? ""} />
-              <AvatarFallback>
-                {session?.user?.email?.slice(0, 2)}
-              </AvatarFallback>
+              <AvatarImage
+                src={
+                  userAvatar !== undefined
+                    ? `${env.NEXT_PUBLIC_UPLOAD_PATH}/${userAvatar.imageId}`
+                    : undefined
+                }
+                alt={userData?.email ?? ""}
+              />
+              <AvatarFallback>{userData?.email?.slice(0, 2)}</AvatarFallback>
             </Avatar>
             <Button>Выберите фото профиля</Button>
           </div>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Фото профиля</DialogTitle>
-            <DialogDescription>
-              Выберите и отредактируйте фото профиля. Не забудьте сохранить
-              перед выходом
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-4">
-            <Dropzone
-              onDrop={(dropped) => setAvatar(!!dropped[0] ? dropped[0] : null)}
-              noClick
-              noKeyboard
-            >
-              {({ getRootProps, getInputProps }) => (
-                <Label
-                  {...getRootProps()}
-                  htmlFor="profileUploader"
-                  className="cursor-pointer border-2 p-10 text-center"
-                >
-                  Нажмите или перенесите фото сюда
-                  <Input
-                    {...getInputProps()}
-                    id="profileUploader"
-                    type="file"
-                  />
-                </Label>
-              )}
-            </Dropzone>
-            {avatar && (
+          {uploadProgress > 0 && uploadProgress < 100 && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Загрузка</DialogTitle>
+              </DialogHeader>
+              <Progress value={uploadProgress} />
+            </>
+          )}
+          {(uploadProgress === 0 || uploadProgress === 100) && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Фото профиля</DialogTitle>
+                <DialogDescription>
+                  Выберите и отредактируйте фото профиля. Не забудьте сохранить
+                  перед выходом
+                </DialogDescription>
+              </DialogHeader>
               <div className="flex flex-col gap-4">
-                <AvatarEditor
-                  image={avatar}
-                  width={250}
-                  height={250}
-                  border={50}
-                  color={[255, 255, 255, 0.6]} // RGBA
-                  scale={scale}
-                  rotate={0}
-                  borderRadius={125}
-                />
-                <Slider
-                  onValueChange={(value) => setScale(value[0])}
-                  defaultValue={[scale]}
-                  min={1}
-                  max={2}
-                  step={0.05}
-                />
+                <Dropzone
+                  onDrop={(dropped) =>
+                    setAvatar(!!dropped[0] ? dropped[0] : null)
+                  }
+                  noClick
+                  noKeyboard
+                >
+                  {({ getRootProps, getInputProps }) => (
+                    <Label
+                      {...getRootProps()}
+                      htmlFor="profileUploader"
+                      className="cursor-pointer border-2 p-10 text-center"
+                    >
+                      Нажмите или перенесите фото сюда
+                      <Input
+                        {...getInputProps()}
+                        id="profileUploader"
+                        type="file"
+                      />
+                    </Label>
+                  )}
+                </Dropzone>
+                {avatar && (
+                  <div className="flex flex-col gap-4">
+                    <AvatarEditor
+                      ref={avatarEditor}
+                      image={avatar}
+                      width={250}
+                      height={250}
+                      border={50}
+                      color={[255, 255, 255, 0.6]}
+                      scale={scale}
+                      rotate={0}
+                      borderRadius={125}
+                    />
+                    <Slider
+                      onValueChange={(value) => setScale(value[0] ?? 1)}
+                      defaultValue={[scale]}
+                      min={1}
+                      max={2}
+                      step={0.05}
+                    />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button type="submit">Сохранить</Button>
-          </DialogFooter>
+              {avatar && (
+                <DialogFooter>
+                  <Button onClick={uploadAvatar}>Сохранить</Button>
+                </DialogFooter>
+              )}
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
   );
 }
 
-function AdditionalPhotosShow() {
-  const [photos, setPhotos] = useState<(File | null)[]>([]);
-
-  return (
-    <div>
-      <Dialog>
-        <DialogTrigger asChild>
-          <div className="flex cursor-pointer flex-col gap-2">
-            <Button>Загрузите дополнительные фото</Button>
-          </div>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Фото</DialogTitle>
-            <DialogDescription>
-              Загрузите до 5 штук. Не забудьте сохранить
-              перед выходом
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-4">
-            <Dropzone
-              onDrop={(dropped) => setPhotos(dropped)}
-              noClick
-              noKeyboard
-            >
-              {({ getRootProps, getInputProps }) => (
-                <Label
-                  {...getRootProps()}
-                  htmlFor="profileUploader"
-                  className="cursor-pointer border-2 p-10 text-center"
-                >
-                  Нажмите или перенесите фото сюда
-                  <Input
-                    {...getInputProps()}
-                    id="profileUploader"
-                    type="file"
-                    multiple={true}
-                  />
-                </Label>
-              )}
-            </Dropzone>
-            { photos.map(photo => JSON.stringify(photo)) }
-          </div>
-          <DialogFooter>
-            <Button type="submit">Сохранить</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
-}
+// function AdditionalPhotosShow() {
+//   const [photos, setPhotos] = useState<(File | null)[]>([]);
+//
+//   return (
+//     <div>
+//       <Dialog>
+//         <DialogTrigger asChild>
+//           <div className="flex cursor-pointer flex-col gap-2">
+//             <Button>Загрузите дополнительные фото</Button>
+//           </div>
+//         </DialogTrigger>
+//         <DialogContent className="sm:max-w-[425px]">
+//           <DialogHeader>
+//             <DialogTitle>Фото</DialogTitle>
+//             <DialogDescription>
+//               Загрузите до 5 штук. Не забудьте сохранить перед выходом
+//             </DialogDescription>
+//           </DialogHeader>
+//           <div className="flex flex-col gap-4">
+//             <Dropzone
+//               onDrop={(dropped) => setPhotos(dropped)}
+//               noClick
+//               noKeyboard
+//             >
+//               {({ getRootProps, getInputProps }) => (
+//                 <Label
+//                   {...getRootProps()}
+//                   htmlFor="profileUploader"
+//                   className="cursor-pointer border-2 p-10 text-center"
+//                 >
+//                   Нажмите или перенесите фото сюда
+//                   <Input
+//                     {...getInputProps()}
+//                     id="profileUploader"
+//                     type="file"
+//                     multiple={true}
+//                   />
+//                 </Label>
+//               )}
+//             </Dropzone>
+//             {photos.map((photo) => JSON.stringify(photo))}
+//           </div>
+//           <DialogFooter>
+//             <Button type="submit">Сохранить</Button>
+//           </DialogFooter>
+//         </DialogContent>
+//       </Dialog>
+//     </div>
+//   );
+// }
 
 function UserInfoShow({
   className,

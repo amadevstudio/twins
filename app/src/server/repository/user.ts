@@ -1,6 +1,7 @@
 import { db } from "@/server/db";
 import { queryUserType, searchUserPageSize } from "@/server/api/types/user";
 import {
+  $Enums,
   KeyWord,
   Prisma,
   RegistrationTarget,
@@ -9,6 +10,7 @@ import {
   UserToRegistrationTarget,
 } from "@prisma/client";
 import SortOrder = Prisma.SortOrder;
+import FilesProvider = $Enums.FilesProvider;
 
 const userBaseInfoQuery = {
   include: {
@@ -26,10 +28,17 @@ const userWithRegistrationTargetsQuery = {
   },
 };
 
+const userImagesQuery = {
+  include: {
+    userImages: true
+  }
+}
+
 const userFullInfoQuery = {
   include: {
     ...userBaseInfoQuery.include,
     ...userWithRegistrationTargetsQuery.include,
+    ...userImagesQuery.include,
     userToKeyWords: {
       include: {
         keyWord: true,
@@ -248,4 +257,28 @@ export async function updateKeyWordsConnections(
       }),
     ),
   );
+}
+
+export async function updateImage(
+  userId: string,
+  imageProvider: FilesProvider,
+  imageId: string,
+  isAvatar: boolean,
+) {
+  return db.userImage.upsert({
+    where: {
+      userId: userId,
+      isAvatar: isAvatar,
+    },
+    update: {
+      imageProvider: imageProvider,
+      imageId: imageId,
+    },
+    create: {
+      userId: userId,
+      isAvatar: isAvatar,
+      imageProvider: imageProvider,
+      imageId: imageId,
+    },
+  });
 }

@@ -1,17 +1,23 @@
-import {Form, FormControl, FormDescription, FormField, FormItem} from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import React from "react";
-import {searchUserSchema, searchUserType} from "@/server/api/types/user";
+import { searchUserSchema } from "@/server/api/types/user";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 
 export default function SearchForm({
   form,
-  onSubmit
+  onSubmit,
 }: {
   form: UseFormReturn<z.infer<typeof searchUserSchema>>;
-  onSubmit: (data: z.infer<typeof searchUserSchema>) => Promise<void>
+  onSubmit: (data: z.infer<typeof searchUserSchema>) => Promise<void>;
 }) {
   return (
     <Form {...form}>
@@ -28,12 +34,11 @@ export default function SearchForm({
           render={({ field }) => (
             <FormItem className="w-full md:flex-grow">
               <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Юрист йога фортепиано"
-                />
+                <Input {...field} placeholder="Юрист йога фортепиано" />
               </FormControl>
-              <FormDescription>Введите ключевые слова для поиска нужного вам человека</FormDescription>
+              <FormDescription>
+                Введите ключевые слова для поиска нужного вам человека
+              </FormDescription>
             </FormItem>
           )}
         />

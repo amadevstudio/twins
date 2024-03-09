@@ -26,6 +26,10 @@ enum KeyWordsSubscriptionStatuses {
   COMPLETED
 }
 
+enum FilesProvider {
+  LOCAL
+}
+
 // model Post {
 //     id        Int      @id @default(autoincrement())
 //     name      String
@@ -87,6 +91,7 @@ model User {
   userToKeyWords            UserToKeyWord[]
   userToRegistrationTargets UserToRegistrationTarget[]
   keyWordsSubsriptions      KeyWordsSubscription[]
+  userImages                UserImage[]
 }
 
 model UserInfo {
@@ -97,6 +102,14 @@ model UserInfo {
   birthday       DateTime?
   contacts       String?
   additionalInfo String?
+}
+
+model UserImage {
+  userId        String        @id
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  imageProvider FilesProvider
+  imageId       String
+  isAvatar      Boolean
 }
 
 model UserToKeyWord {

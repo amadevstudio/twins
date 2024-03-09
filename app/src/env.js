@@ -12,6 +12,8 @@ export const env = createEnv({
         .enum(["development", "test", "production"])
         .default("development"),
 
+    UPLOAD_PATH: z.string(),
+
     REDIS_SERVER: z.string(),
     REDIS_PASSWORD: z.string(),
 
@@ -53,7 +55,9 @@ export const env = createEnv({
     NEXT_PUBLIC_DOMAIN: z.string().url(),
     NEXT_PUBLIC_SUPPORT_EMAIL: z.string().email(),
 
-    NEXT_PUBLIC_MAX_KEY_WORDS: z.string()
+    NEXT_PUBLIC_MAX_KEY_WORDS: z.string(),
+
+    NEXT_PUBLIC_UPLOAD_PATH: z.string()
   },
 
   /**
@@ -68,6 +72,9 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
 
     NEXT_PUBLIC_MAX_KEY_WORDS: process.env.NEXT_PUBLIC_MAX_KEY_WORDS,
+
+    NEXT_PUBLIC_UPLOAD_PATH: process.env.NEXT_PUBLIC_UPLOAD_PATH,
+    UPLOAD_PATH: process.env.UPLOAD_PATH,
 
     REDIS_SERVER: process.env.REDIS_SERVER,
     REDIS_PASSWORD: process.env.REDIS_PASSWORD,
