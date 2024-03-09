@@ -247,6 +247,7 @@ function AnonSubscribeAction({ searchQuery }: { searchQuery: string }) {
   });
 
   const [subscribedOnSearchQuery, setSubscribedOnSearchQuery] = useState(false);
+  const [userVerified, setUserVerified] = useState(false);
 
   const isSubscribedResult =
     api.searchQuerySubscription.findByQueryAnon.useQuery(searchQuery);
@@ -264,6 +265,12 @@ function AnonSubscribeAction({ searchQuery }: { searchQuery: string }) {
         toast("Вы подписаны на запрос!");
       },
       onError: (error) => {
+        if (error.message === "User is verified") {
+          toast("Пользователь существует и подтверждён, войдите в аккаунт");
+          setUserVerified(true);
+          return;
+        }
+
         console.error(error);
         toast("Возникла ошибка");
       },
@@ -288,23 +295,39 @@ function AnonSubscribeAction({ searchQuery }: { searchQuery: string }) {
       </div>
       <div className="flex items-center gap-2">
         {!subscribedOnSearchQuery && (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-2 md:flex-row flex-col">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input {...field} placeholder="email@example.ru" />
-                    </FormControl>
-                    <FormMessage defaultError="Введите электронную почту" />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">Подписаться</Button>
-            </form>
-          </Form>
+          <>
+            {userVerified && (
+              <Button
+                onClick={
+                  () => signIn(undefined) // , { email: form.getValues("email") })
+                }
+              >
+                Войти в аккаунт
+              </Button>
+            )}
+            {!userVerified && (
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="flex flex-col gap-2 md:flex-row"
+                >
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input {...field} placeholder="email@example.ru" />
+                        </FormControl>
+                        <FormMessage defaultError="Введите электронную почту" />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit">Подписаться</Button>
+                </form>
+              </Form>
+            )}
+          </>
         )}
         {subscribedOnSearchQuery && <p>Вы подписаны на запрос</p>}
       </div>
