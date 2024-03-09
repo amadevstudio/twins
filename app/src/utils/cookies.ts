@@ -5,6 +5,14 @@ import { env } from "@/env";
 const cookiesDefaultLifetimeMonths = 1;
 const maxAgeSeconds = cookiesDefaultLifetimeMonths * 2_592_000; // 30 * 24 * 60 * 60
 
+export function unsetCookie(
+  res: NextApiResponse,
+  name: string,
+  options: CookieSerializeOptions | undefined = undefined,
+) {
+  setCookie(res, name, "", { ...options, expires: new Date(0), maxAge: 0 });
+}
+
 export function setCookie(
   res: NextApiResponse,
   name: string,
