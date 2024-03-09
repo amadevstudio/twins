@@ -3,11 +3,31 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import type { GetServerSidePropsContext } from "next";
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const { req, query } = context;
+  const session = await getSession({ req });
+  const { callbackUrl } = query;
+  if (session) {
+    return {
+      redirect: {
+        destination: callbackUrl,
+      },
+    };
+  }
+
+  return {
+    props: {
+      callbackUrl,
+    },
+  };
+}
 
 export default function SignIn() {
   const providers = [
