@@ -289,7 +289,7 @@ function AnonSubscribeAction({ searchQuery }: { searchQuery: string }) {
       <div className="flex items-center gap-2">
         {!subscribedOnSearchQuery && (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-2">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-2 md:flex-row flex-col">
               <FormField
                 control={form.control}
                 name="email"
