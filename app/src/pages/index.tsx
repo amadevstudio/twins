@@ -73,11 +73,11 @@ function AuthShowcase() {
   // );
 
   const authViaGoogle = async () => {
-    await signIn("google", { callbackUrl: "/user" });
+    await signIn("google");
   };
 
   const authViaEmail = async () => {
-    await signIn(undefined, { callbackUrl: "/user" });
+    await signIn(undefined);
   };
 
   return (

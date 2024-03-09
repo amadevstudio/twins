@@ -35,7 +35,7 @@ export default function Header() {
             <Button>Написать в поддержку</Button>
           </Link>
           {!sessionData && (
-            <Button onClick={() => signIn(undefined, { callbackUrl: "/user" })}>
+            <Button onClick={() => signIn(undefined)}>
               Войти
             </Button>
           )}

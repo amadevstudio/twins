@@ -29,11 +29,11 @@ export default function SignIn() {
 
   const loginViaProvider = async (provider: { name: string; id?: string }) => {
     if (provider.name == "email") {
-      await signIn(provider.name, { email: provider.id, callbackUrl: "/user" });
+      await signIn(provider.name, { email: provider.id });
       return;
     }
 
-    await signIn(provider.name, { callbackUrl: "/user" });
+    await signIn(provider.name);
   };
 
   return (
