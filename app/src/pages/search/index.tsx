@@ -290,6 +290,8 @@ function AnonSubscribeAction({ searchQuery }: { searchQuery: string }) {
     });
 
   function onSubmit(data: z.infer<typeof formSchema>) {
+    localSetItem("anonUserEmail", data.email);
+
     searchSubscriptionMutation.mutate({
       email: data.email,
       query: searchQuery,
