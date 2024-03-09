@@ -121,7 +121,7 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: env.NEXTAUTH_GOOGLE_ID,
       clientSecret: env.NEXTAUTH_GOOGLE_SECRET,
-      allowDangerousEmailAccountLinking: true
+      allowDangerousEmailAccountLinking: true,
     }),
     /**
      * ...add more providers here.
