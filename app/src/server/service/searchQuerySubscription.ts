@@ -68,7 +68,12 @@ export async function subscribeAnon(
   email: string,
   searchQuery: string,
 ) {
-  const userByEmail = await userRepo.findByEmail(email);
+  const verifiedUser = await userRepo.findByEmail(email, { verified: true });
+  if (verifiedUser !== null) {
+    throw new Error("User is verified");
+  }
+
+  const userByEmail = await userRepo.findByEmail(email, { verified: false });
 
   async function anonUser() {
     if (userByEmail) {
@@ -93,7 +98,7 @@ export async function subscribeAnon(
 
   setCookie(res, "anonUserId", user.id);
 
-  await subscribe(user.id, searchQuery);
+  return await subscribe(user.id, searchQuery);
 }
 
 export async function findUserIntersection(batch_size = 10000) {

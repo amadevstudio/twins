@@ -1,20 +1,13 @@
-import { signIn, useSession } from "next-auth/react";
+import { signIn, useSession } from "@/utils/auth/auth";
 
 import { Roboto } from "next/font/google";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { searchUserSchema, searchUserType } from "@/server/api/types/user";
+import { searchUserSchema } from "@/server/api/types/user";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  Form,
-  FormControl, FormDescription,
-  FormField,
-  FormItem,
-} from "@/components/ui/form";
+import { type z } from "zod";
 import React from "react";
 import { useRouter } from "next/router";
 import { constructSearchUrl } from "@/utils/view/search/helper";
@@ -73,11 +66,11 @@ function AuthShowcase() {
   // );
 
   const authViaGoogle = async () => {
-    await signIn("google", { callbackUrl: "/user" });
+    await signIn("google");
   };
 
   const authViaEmail = async () => {
-    await signIn(undefined, { callbackUrl: "/user" });
+    await signIn(undefined);
   };
 
   return (

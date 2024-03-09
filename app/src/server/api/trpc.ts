@@ -16,6 +16,7 @@ import { ZodError } from "zod";
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
 import { NextApiRequest, NextApiResponse } from "next";
+import { unsetAnonCookies } from "@/server/api/middlewares/protectedMiddlewares";
 
 /**
  * 1. CONTEXT
@@ -138,6 +139,9 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   if (!ctx.session || !ctx.session.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
+  unsetAnonCookies(ctx.res);
+
   return next({
     ctx: {
       // infers the `session` as non-nullable

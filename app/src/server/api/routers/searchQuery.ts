@@ -4,6 +4,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import * as searchQuerySubscriptionService from "@/server/service/searchQuerySubscription";
+import * as userService from "@/server/service/user";
 import { z } from "zod";
 import { subscribeAnonSchema } from "@/server/api/types/searchQuery";
 
