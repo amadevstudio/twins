@@ -26,6 +26,9 @@ export async function signIn<
   P extends RedirectableProviderType ? SignInResponse | undefined : undefined
 > {
 
+  // Clear Anon data
+  localRemoveItem('anonUserEmail');
+
   return nextAuth.signIn(provider, options, authorizationParams);
 }
 

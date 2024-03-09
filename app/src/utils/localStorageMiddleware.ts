@@ -1,3 +1,9 @@
+export function localRemoveItem(key: string) {
+  if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+    localStorage.removeItem(key);
+  }
+}
+
 export function localSetItem(key: string, value: string) {
   if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
     localStorage.setItem(key, value);
