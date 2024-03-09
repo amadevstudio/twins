@@ -1,12 +1,13 @@
 import { AdapterUser } from "next-auth/adapters";
 import * as userRepo from "@/server/repository/user";
 import * as userInfoRepo from "@/server/repository/userInfo";
-import {queryUserType, searchUserType} from "@/server/api/types/user";
+import { queryUserType, searchUserType } from "@/server/api/types/user";
 import * as registrationTargetRepo from "@/server/repository/registrationTarget";
 import * as keyWordRepo from "@/server/repository/keyWord";
-import {processKeyWordsString} from "@/server/service/keyWord";
+import { processKeyWordsString } from "@/server/service/keyWord";
 import { env } from "@/env";
-import {User} from "@prisma/client";
+import { User } from "@prisma/client";
+import { NextApiRequest } from "next";
 
 export async function afterCreate(user: User | null) {
   if (user === null) {
@@ -20,6 +21,15 @@ export async function findByEmail(email: string) {
   return userRepo.findByEmail(email);
 }
 
+export async function findByReqIdAnon(req: NextApiRequest) {
+  const userId = req.cookies.anonUserId;
+  if (userId === undefined) {
+    return null;
+  }
+
+  return userRepo.findById(userId);
+}
+
 export async function findById(userId: string) {
   return userRepo.findById(userId);
 }
@@ -28,11 +38,13 @@ export async function findByIdWithInfo(userId: string) {
   return userRepo.findByIdWithInfo(userId);
 }
 
-export async function findByKeyWords(userId: string | undefined, keyWordsData: searchUserType) {
-  const keyWords = processKeyWordsString(keyWordsData.query)
+export async function findByKeyWords(
+  userId: string | undefined,
+  keyWordsData: searchUserType,
+) {
+  const keyWords = processKeyWordsString(keyWordsData.query);
   return userRepo.findByKeyWords(userId, keyWords, keyWordsData.page);
 }
-
 
 // Dangerous below
 
@@ -45,10 +57,10 @@ export async function updateUserInfo(userId: string, info: queryUserType) {
     info.registrationTarget,
   );
   // To delete: new ones don't have old ones
-  const registrationTargetIds = registrationTargets.map(rt => rt.target);
+  const registrationTargetIds = registrationTargets.map((rt) => rt.target);
   const registrationTargetConnectionsToDelete =
     user.userToRegistrationTargets.filter(
-      (utrt) => !registrationTargetIds.includes(utrt.registrationTargetId)
+      (utrt) => !registrationTargetIds.includes(utrt.registrationTargetId),
     );
   // To create: old ones don't have new ones
   const userRegistrationTargetTexts = user.userToRegistrationTargets.map(
@@ -66,8 +78,8 @@ export async function updateUserInfo(userId: string, info: queryUserType) {
 
   // KeyWords processing
   // Make
-  const newKeyWords = processKeyWordsString(info.keyWords)
-  const newKeyWordsCreated = await keyWordRepo.findOrCreateByIds(newKeyWords)
+  const newKeyWords = processKeyWordsString(info.keyWords);
+  const newKeyWordsCreated = await keyWordRepo.findOrCreateByIds(newKeyWords);
   // To delete
   const keyWordsConnectionsToDelete = user.userToKeyWords.filter(
     (utkw) => !newKeyWords.includes(utkw.keyWordId),
@@ -77,11 +89,11 @@ export async function updateUserInfo(userId: string, info: queryUserType) {
   const newKeyWordsOrdered = newKeyWordsCreated.map((nkw, i) => {
     return {
       keyWord: nkw,
-      order: i
-    }
-  })
+      order: i,
+    };
+  });
   // Upsert with order
-  await userRepo.updateKeyWordsConnections(user, newKeyWordsOrdered)
+  await userRepo.updateKeyWordsConnections(user, newKeyWordsOrdered);
 
   await userRepo.updateUserInfo(userId, info);
 }

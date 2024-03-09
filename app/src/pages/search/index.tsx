@@ -30,10 +30,7 @@ import { age } from "@/utils/types/date";
 import Link from "next/link";
 import SearchForm from "@/components/base/search";
 import { signIn, useSession } from "next-auth/react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ComponentChildren } from "preact";
-import { env } from "@/env";
 import {
   Form,
   FormControl,
@@ -43,6 +40,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { emailSchema } from "@/server/api/types/searchQuery";
+import { localGetItem, localSetItem } from "@/utils/localStorageMiddleware";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
@@ -245,6 +243,21 @@ function AnonSubscribeAction({ searchQuery }: { searchQuery: string }) {
       email: "",
     },
   });
+
+  const localUserEmail = localGetItem("anonUserEmail");
+  const userAnonQuery = api.user.getUserAnon.useQuery(
+    undefined,
+    { enabled: localUserEmail === null, refetchOnWindowFocus: false },
+  );
+  useEffect(() => {
+    if (localUserEmail !== null) form.setValue("email", localUserEmail);
+  }, [form, localUserEmail]);
+  useEffect(() => {
+    if (typeof userAnonQuery.data?.email === "string") {
+      localSetItem("anonUserEmail", userAnonQuery.data.email);
+      form.setValue("email", userAnonQuery.data.email);
+    }
+  }, [form, userAnonQuery.data]);
 
   const [subscribedOnSearchQuery, setSubscribedOnSearchQuery] = useState(false);
   const [userVerified, setUserVerified] = useState(false);

@@ -29,6 +29,11 @@ export const user = createTRPCRouter({
       return await userService.findByKeyWords(ctx.session?.user?.id, input);
     }),
 
+  getUserAnon: publicProcedure
+    .query(async ({ctx}) => {
+      return await userService.findByReqIdAnon(ctx.req!);
+    }),
+
   // Protected below
 
   self: protectedProcedure.query(async ({ ctx }) => {
