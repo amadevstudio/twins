@@ -41,10 +41,23 @@ const userFullInfoQuery = {
   },
 };
 
-export async function findByEmail(email: string) {
+export async function findByEmail(
+  email: string,
+  params: { verified?: boolean } = {},
+) {
   const query = {
-    where: { email: email }
-  }
+    where: {
+      email: email,
+      // Have email verified or some Account
+      ...(params.verified === true && {
+        OR: [{ emailVerified: { not: null } }, { accounts: { some: {} } }],
+      }),
+      ...(params.verified === false && {
+        emailVerified: null,
+        accounts: { none: {} },
+      }),
+    },
+  };
   return db.user.findFirst(query);
 }
 
@@ -80,14 +93,17 @@ export async function findByKeyWords(
   pageParam?: number,
 ) {
   if (keyWords.length == 0) {
-    return new Promise(function(resolve: (value: {results: []; pagination: {total: number}}) => void, _) {
+    return new Promise(function (
+      resolve: (value: { results: []; pagination: { total: number } }) => void,
+      _,
+    ) {
       resolve({
         results: [],
         pagination: {
-          total: 0
-        }
-      })
-    })
+          total: 0,
+        },
+      });
+    });
   }
 
   const pageSize = searchUserPageSize;
