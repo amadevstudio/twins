@@ -1,13 +1,21 @@
 import { Queue } from "bullmq";
 import * as redis_conf from "@/jobs/redis_conf";
 
-export const MAILER_QUEUE_NAME = "searchQuerySubscriptionMailer";
+export const QUEUE_NAMES = {
+  CREATED: "searchQueryCreatedSubscriptionMailer",
+  COMPLETED: "searchQueryCompletedSubscriptionMailer",
+};
 
-const searchQuerySubscriptionMailerQueue = new Queue(
-  MAILER_QUEUE_NAME,
+export const searchQueryCreatedSubscriptionMailerQueue = new Queue(
+  QUEUE_NAMES.CREATED,
   {
     connection: redis_conf.config,
   },
 );
 
-export default searchQuerySubscriptionMailerQueue;
+export const searchQueryCompletedSubscriptionMailerQueue = new Queue(
+  QUEUE_NAMES.COMPLETED,
+  {
+    connection: redis_conf.config,
+  },
+);

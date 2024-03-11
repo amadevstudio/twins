@@ -4,6 +4,10 @@ import * as keyWordRepo from "@/server/repository/keyWord";
 import * as userRepo from "@/server/repository/user";
 import { NextApiRequest } from "next";
 import { KeyWordsSubscriptionStatuses } from "@prisma/client";
+import {
+  searchQueryCreatedSubscriptionMailerQueue,
+  QUEUE_NAMES,
+} from "@/jobs/queues/searchQuerySubscriptionMailerQueue";
 
 export async function findByQuery(userId: string, searchQuery: string) {
   const keyWords = processKeyWordsString(searchQuery);
@@ -44,7 +48,17 @@ export async function subscribe(userId: string, searchQuery: string) {
     return subscription;
   }
 
-  return searchQuerySubscriptionRepo.create(userId, newKeyWordsCreated);
+  const newSubscription = await searchQuerySubscriptionRepo.create(
+    userId,
+    newKeyWordsCreated,
+  );
+
+  await searchQueryCreatedSubscriptionMailerQueue.add(
+    `${QUEUE_NAMES.CREATED} for ${newSubscription.userId}, subscriptionId is ${newSubscription.id}`,
+    newSubscription,
+  );
+
+  return newSubscription;
 }
 
 export async function findByQueryAnon(
