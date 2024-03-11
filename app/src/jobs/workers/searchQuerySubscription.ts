@@ -1,14 +1,17 @@
 import { Job, Worker } from "bullmq";
 
 import * as redis_conf from "../redis_conf";
-import { findUserIntersection } from "@/server/service/searchQuerySubscription";
 import { searchQuerySubscriptionMailer } from "@/mailers/searchQuerySubscriptionMailer";
-import searchQuerySubscriptionMailerQueue from "@/jobs/queues/searchQuerySubscriptionMailerQueue";
+import searchQuerySubscriptionMailerQueue, {
+  MAILER_QUEUE_NAME,
+} from "@/jobs/queues/searchQuerySubscriptionMailerQueue";
 import * as userService from "@/server/service/user";
 import * as searchQueryService from "@/server/service/searchQuerySubscription";
+import { QUEUE_NAMES } from "@/jobs/queues/repeatable/config";
+import { findUserIntersection } from "@/server/service/searchQuerySubscription";
 
 const sendMailWorker = new Worker(
-  "searchQuerySubscriptionMailer",
+  MAILER_QUEUE_NAME,
   async (
     job: Job<
       { id: string; searcher_id: string; candidate_id: string },
@@ -46,13 +49,13 @@ const sendMailWorker = new Worker(
 );
 
 const worker = new Worker(
-  "searchQuerySubscription",
+  QUEUE_NAMES.SEARCH_QUERY_SUBSCRIPTION,
   async (_) => {
     const subscriptionUserIntersection = await findUserIntersection();
     await Promise.all(
       subscriptionUserIntersection.map(async (intersection) => {
         await searchQuerySubscriptionMailerQueue.add(
-          "searchQuerySubscriptionMail",
+          MAILER_QUEUE_NAME,
           intersection,
         );
       }),
