@@ -1,14 +1,46 @@
 import { Job, Worker } from "bullmq";
 
 import * as redis_conf from "../redis_conf";
-import { findUserIntersection } from "@/server/service/searchQuerySubscription";
-import { searchQuerySubscriptionMailer } from "@/mailers/searchQuerySubscriptionMailer";
-import searchQuerySubscriptionMailerQueue from "@/jobs/queues/searchQuerySubscriptionMailerQueue";
+import {
+  searchQuerySubscriptionCompletedMailer,
+  searchQuerySubscriptionCreatedMailer,
+} from "@/mailers/searchQuerySubscriptionMailer";
+import {
+  QUEUE_NAMES as MAILER_QUEUE_NAME,
+  searchQueryCompletedSubscriptionMailerQueue,
+} from "@/jobs/queues/searchQuerySubscriptionMailerQueue";
 import * as userService from "@/server/service/user";
 import * as searchQueryService from "@/server/service/searchQuerySubscription";
+import { QUEUE_NAMES as REPEATABLE_QUEUE_NAMES } from "@/jobs/queues/repeatable/config";
+import { findUserIntersection } from "@/server/service/searchQuerySubscription";
+import { type KeyWordsSubscription } from "@prisma/client";
 
-const sendMailWorker = new Worker(
-  "searchQuerySubscriptionMailer",
+const sendCreatedMailWorker = new Worker(
+  MAILER_QUEUE_NAME.CREATED,
+  async (job: Job<KeyWordsSubscription, void, string>) => {
+    const user = await userService.findById(job.data.userId);
+    const subscription = await searchQueryService.findById(job.data.id);
+    if (
+      user?.email == null ||
+      subscription == null ||
+      subscription.status != "NEW"
+    ) {
+      return;
+    }
+
+    const searchKeyWords = subscription.keyWordsSubscriptionToKeyWords
+      .map((kwstkw: { keyWord: { keyWord: string } }) => kwstkw.keyWord.keyWord)
+      .join(" ");
+
+    await searchQuerySubscriptionCreatedMailer(user.email, searchKeyWords);
+  },
+  {
+    connection: redis_conf.config,
+  },
+);
+
+const sendSuccessMailWorker = new Worker(
+  MAILER_QUEUE_NAME.COMPLETED,
   async (
     job: Job<
       { id: string; searcher_id: string; candidate_id: string },
@@ -32,7 +64,7 @@ const sendMailWorker = new Worker(
       .map((kwstkw: { keyWord: { keyWord: string } }) => kwstkw.keyWord.keyWord)
       .join(" ");
 
-    await searchQuerySubscriptionMailer(
+    await searchQuerySubscriptionCompletedMailer(
       user.email,
       candidate.id,
       searchKeyWords,
@@ -46,13 +78,14 @@ const sendMailWorker = new Worker(
 );
 
 const worker = new Worker(
-  "searchQuerySubscription",
+  REPEATABLE_QUEUE_NAMES.SEARCH_QUERY_SUBSCRIPTION,
   async (_) => {
     const subscriptionUserIntersection = await findUserIntersection();
     await Promise.all(
       subscriptionUserIntersection.map(async (intersection) => {
-        await searchQuerySubscriptionMailerQueue.add(
-          "searchQuerySubscriptionMail",
+        await searchQueryCompletedSubscriptionMailerQueue.add(
+          `${MAILER_QUEUE_NAME.COMPLETED} for ${intersection.searcher_id},
+subscriptionId is ${intersection.id}, candidate is ${intersection.candidate_id}`,
           intersection,
         );
       }),

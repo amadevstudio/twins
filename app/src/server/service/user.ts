@@ -1,14 +1,11 @@
-import { AdapterUser } from "next-auth/adapters";
 import * as userRepo from "@/server/repository/user";
 import * as userInfoRepo from "@/server/repository/userInfo";
 import { queryUserType, searchUserType } from "@/server/api/types/user";
 import * as registrationTargetRepo from "@/server/repository/registrationTarget";
 import * as keyWordRepo from "@/server/repository/keyWord";
 import { processKeyWordsString } from "@/server/service/keyWord";
-import { env } from "@/env";
-import {$Enums, User} from "@prisma/client";
+import { FilesProvider, User } from "@prisma/client";
 import { NextApiRequest } from "next";
-import FilesProvider = $Enums.FilesProvider;
 
 export async function afterCreate(user: User | null) {
   if (user === null) {
@@ -99,6 +96,11 @@ export async function updateUserInfo(userId: string, info: queryUserType) {
   await userRepo.updateUserInfo(userId, info);
 }
 
-export function updateImage(userId: string, avatarService: FilesProvider, avatarId: string, isAvatar: boolean) {
+export function updateImage(
+  userId: string,
+  avatarService: FilesProvider,
+  avatarId: string,
+  isAvatar: boolean,
+) {
   return userRepo.updateImage(userId, avatarService, avatarId, isAvatar);
 }

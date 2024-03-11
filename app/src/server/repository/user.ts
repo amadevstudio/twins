@@ -1,7 +1,7 @@
 import { db } from "@/server/db";
 import { queryUserType, searchUserPageSize } from "@/server/api/types/user";
 import {
-  $Enums,
+  FilesProvider,
   KeyWord,
   Prisma,
   RegistrationTarget,
@@ -10,7 +10,6 @@ import {
   UserToRegistrationTarget,
 } from "@prisma/client";
 import SortOrder = Prisma.SortOrder;
-import FilesProvider = $Enums.FilesProvider;
 
 const userBaseInfoQuery = {
   include: {
@@ -30,9 +29,9 @@ const userWithRegistrationTargetsQuery = {
 
 const userImagesQuery = {
   include: {
-    userImages: true
-  }
-}
+    userImages: true,
+  },
+};
 
 const userFullInfoQuery = {
   include: {

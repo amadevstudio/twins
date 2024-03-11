@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { cn } from "@/lib/utils";
+import { cn, ProtoExtends } from "@/lib/utils";
 import { type z } from "zod";
 import { api } from "@/utils/api";
 import { getServerSession, type Session } from "next-auth";
@@ -21,7 +21,11 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { queryUserSchema, userSexAllowed } from "@/server/api/types/user";
+import {
+  queryUserSchema,
+  queryUserType,
+  userSexAllowed,
+} from "@/server/api/types/user";
 import { authOptions } from "@/server/auth";
 import type {
   GetServerSidePropsContext,
@@ -67,6 +71,45 @@ import { constants } from "@/constants";
 import { Progress } from "@/components/ui/progress";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
+
+type TUserForm = ProtoExtends<
+  queryUserType,
+  {
+    sex: "MALE" | "FEMALE" | undefined;
+  }
+>;
+
+const prepareKeyWordsToShow = (
+  userToKeyWords: { order: number; keyWord: { keyWord: string } }[] | undefined,
+) => {
+  if (userToKeyWords === undefined) return "";
+
+  return userToKeyWords
+    .sort((a, b) => a.order - b.order)
+    .map((utkw) => utkw.keyWord.keyWord)
+    .join(" ");
+};
+
+const getFormValues = (userData: RouterOutput["user"]["self"]): TUserForm => {
+  return {
+    name: userData?.name ?? "",
+    sex:
+      userData?.userInfo?.sex !== "EMPTY" &&
+      userData?.userInfo?.sex &&
+      userSexAllowed.includes(userData.userInfo.sex)
+        ? userData.userInfo.sex
+        : undefined,
+    city: userData?.userInfo?.city ?? "",
+    birthday: userData?.userInfo?.birthday ?? undefined,
+    contacts: userData?.userInfo?.contacts ?? "",
+    keyWords: prepareKeyWordsToShow(userData?.userToKeyWords),
+    additionalInfo: userData?.userInfo?.additionalInfo ?? "",
+    registrationTarget:
+      userData?.userToRegistrationTargets?.map(
+        (utrt) => utrt.registrationTarget.target,
+      ) ?? [],
+  };
+};
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getServerSession(context.req, context.res, authOptions);
@@ -346,46 +389,18 @@ function UserInfoShow({
 }) {
   const context = api.useUtils();
 
-  const registrationTargets = api.registrationTarget.getAll.useQuery();
+  const registrationTargets = api.registrationTarget.getAll.useQuery(
+    undefined,
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
 
   const updateUserSchema = queryUserSchema;
 
-  const prepareKeyWordsToShow = (
-    userToKeyWords:
-      | { order: number; keyWord: { keyWord: string } }[]
-      | undefined,
-  ) => {
-    if (userToKeyWords === undefined) return "";
-
-    return userToKeyWords
-      .sort((a, b) => a.order - b.order)
-      .map((utkw) => utkw.keyWord.keyWord)
-      .join(" ");
-  };
-
-  function getFormValues() {
-    return {
-      name: userData?.name ?? "",
-      sex:
-        userData?.userInfo?.sex !== "EMPTY" &&
-        userData?.userInfo?.sex &&
-        userSexAllowed.includes(userData.userInfo.sex)
-          ? userData.userInfo.sex
-          : undefined,
-      city: userData?.userInfo?.city ?? "",
-      birthday: userData?.userInfo?.birthday ?? undefined,
-      contacts: userData?.userInfo?.contacts ?? "",
-      keyWords: prepareKeyWordsToShow(userData?.userToKeyWords),
-      additionalInfo: userData?.userInfo?.additionalInfo ?? "",
-      registrationTarget: userData?.userToRegistrationTargets?.map(
-        (utrt) => utrt.registrationTarget.target,
-      ),
-    };
-  }
-
   const form = useForm<z.infer<typeof updateUserSchema>>({
     resolver: zodResolver(updateUserSchema),
-    defaultValues: getFormValues(),
+    defaultValues: getFormValues(userData),
   });
 
   const [birthdayDirectInput, setBirthdayDirectInput] = useState(
@@ -430,19 +445,15 @@ function UserInfoShow({
   }
 
   const userUpdateMutation = api.user.update.useMutation({
-    async onSuccess(input) {
+    async onSuccess() {
       await context.user.self.invalidate();
-      form.setValue(
-        "keyWords",
-        prepareKeyWordsToShow(userData?.userToKeyWords),
-      );
       toast("Сохранено");
     },
   });
 
   useEffect(() => {
-    form.reset(getFormValues());
-  }, [userData]);
+    form.reset(getFormValues(userData));
+  }, [form, userData]);
 
   function onSubmit(data: z.infer<typeof updateUserSchema>) {
     userUpdateMutation.mutate(data);

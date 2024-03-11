@@ -4,9 +4,9 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import * as searchQuerySubscriptionService from "@/server/service/searchQuerySubscription";
-import * as userService from "@/server/service/user";
 import { z } from "zod";
 import { subscribeAnonSchema } from "@/server/api/types/searchQuery";
+import { subscribeAnon } from "@/server/service/searchQuerySubscriptionUnsafe";
 
 export const searchQuerySubscription = createTRPCRouter({
   findByQuery: protectedProcedure
@@ -32,16 +32,15 @@ export const searchQuerySubscription = createTRPCRouter({
     // Anyone can subscribe emails on any queries!
     .input(z.string())
     .query(async ({ ctx, input }) => {
-      return await searchQuerySubscriptionService.findByQueryAnon(ctx.req!, input);
+      return await searchQuerySubscriptionService.findByQueryAnon(
+        ctx.req!,
+        input,
+      );
     }),
 
   subscribeAnon: publicProcedure
     .input(subscribeAnonSchema)
     .mutation(async ({ ctx, input }) => {
-      return await searchQuerySubscriptionService.subscribeAnon(
-        ctx.res!,
-        input.email,
-        input.query,
-      );
+      return await subscribeAnon(ctx.res!, input.email, input.query);
     }),
 });
