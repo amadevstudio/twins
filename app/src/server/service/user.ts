@@ -1,11 +1,9 @@
-import { AdapterUser } from "next-auth/adapters";
 import * as userRepo from "@/server/repository/user";
 import * as userInfoRepo from "@/server/repository/userInfo";
 import { queryUserType, searchUserType } from "@/server/api/types/user";
 import * as registrationTargetRepo from "@/server/repository/registrationTarget";
 import * as keyWordRepo from "@/server/repository/keyWord";
 import { processKeyWordsString } from "@/server/service/keyWord";
-import { env } from "@/env";
 import { User } from "@prisma/client";
 import { NextApiRequest } from "next";
 

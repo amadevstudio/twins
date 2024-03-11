@@ -49,5 +49,5 @@ jobs:
 
             # Restarting
             echo "Performing stop, up"
-            docker compose stop app
-            docker compose up app -d
+            docker compose down
+            docker compose up -d

@@ -52,6 +52,40 @@ import { toast } from "sonner";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
+const prepareKeyWordsToShow = (
+  userToKeyWords:
+    | { order: number; keyWord: { keyWord: string } }[]
+    | undefined,
+) => {
+  if (userToKeyWords === undefined) return "";
+
+  return userToKeyWords
+    .sort((a, b) => a.order - b.order)
+    .map((utkw) => utkw.keyWord.keyWord)
+    .join(" ");
+};
+
+const getFormValues = (userData: RouterOutput["user"]["self"]): TUserForm => {
+  return {
+    name: userData?.name ?? "",
+    sex:
+      userData?.userInfo?.sex !== "EMPTY" &&
+      userData?.userInfo?.sex &&
+      userSexAllowed.includes(userData.userInfo.sex)
+        ? userData.userInfo.sex
+        : undefined,
+    city: userData?.userInfo?.city ?? "",
+    birthday: userData?.userInfo?.birthday ?? undefined,
+    contacts: userData?.userInfo?.contacts ?? "",
+    keyWords: prepareKeyWordsToShow(userData?.userToKeyWords),
+    additionalInfo: userData?.userInfo?.additionalInfo ?? "",
+    registrationTarget:
+      userData?.userToRegistrationTargets?.map(
+        (utrt) => utrt.registrationTarget.target,
+      ) ?? [],
+  };
+};
+
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getServerSession(context.req, context.res, authOptions);
 
@@ -89,40 +123,6 @@ export default function User() {
     refetchOnWindowFocus: false,
   });
 
-  const prepareKeyWordsToShow = (
-    userToKeyWords:
-      | { order: number; keyWord: { keyWord: string } }[]
-      | undefined,
-  ) => {
-    if (userToKeyWords === undefined) return "";
-
-    return userToKeyWords
-      .sort((a, b) => a.order - b.order)
-      .map((utkw) => utkw.keyWord.keyWord)
-      .join(" ");
-  };
-
-  function getFormValues(userData: RouterOutput["user"]["self"]): TUserForm {
-    return {
-      name: userData?.name ?? "",
-      sex:
-        userData?.userInfo?.sex !== "EMPTY" &&
-        userData?.userInfo?.sex &&
-        userSexAllowed.includes(userData.userInfo.sex)
-          ? userData.userInfo.sex
-          : undefined,
-      city: userData?.userInfo?.city ?? "",
-      birthday: userData?.userInfo?.birthday ?? undefined,
-      contacts: userData?.userInfo?.contacts ?? "",
-      keyWords: prepareKeyWordsToShow(userData?.userToKeyWords),
-      additionalInfo: userData?.userInfo?.additionalInfo ?? "",
-      registrationTarget:
-        userData?.userToRegistrationTargets?.map(
-          (utrt) => utrt.registrationTarget.target,
-        ) ?? [],
-    };
-  }
-
   return (
     <div className="container">
       <div className="flex flex-col">
@@ -131,7 +131,6 @@ export default function User() {
             <ProfilePhotosShow session={session} />
             <UserInfoShow
               userData={userData.data}
-              getFormValues={getFormValues}
               className="mt-10"
             />
           </>
@@ -161,17 +160,18 @@ function ProfilePhotosShow({ session }: { session: Session | null }) {
 function UserInfoShow({
   className,
   userData,
-  getFormValues,
 }: {
   className: string;
   userData: RouterOutput["user"]["self"];
-  getFormValues: (userData: RouterOutput["user"]["self"]) => TUserForm;
 }) {
   const context = api.useUtils();
 
-  const registrationTargets = api.registrationTarget.getAll.useQuery(undefined, {
-    refetchOnWindowFocus: false
-  });
+  const registrationTargets = api.registrationTarget.getAll.useQuery(
+    undefined,
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
 
   const updateUserSchema = queryUserSchema;
 
@@ -224,13 +224,14 @@ function UserInfoShow({
   const userUpdateMutation = api.user.update.useMutation({
     async onSuccess() {
       await context.user.self.invalidate();
+      form.reset(getFormValues(userData));
       toast("Сохранено");
     },
   });
 
   useEffect(() => {
     form.reset(getFormValues(userData));
-  }, [form, getFormValues, userData]);
+  }, [form, userData]);
 
   function onSubmit(data: z.infer<typeof updateUserSchema>) {
     userUpdateMutation.mutate(data);
