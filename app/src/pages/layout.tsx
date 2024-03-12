@@ -3,8 +3,14 @@ import Head from "next/head";
 import { env } from "@/env";
 import { cn } from "@/lib/utils";
 import Header from "@/components/base/header";
-import { projectFont } from "@/pages/index";
 import { Toaster } from "@/components/ui/sonner"
+import {Roboto} from "next/font/google";
+
+export const projectFont = Roboto({
+  weight: "400",
+  subsets: ["latin"],
+  display: "auto",
+});
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
