@@ -141,7 +141,7 @@ function SearchResults({
                           .join(", ")}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="flex">
+                    <CardContent className="flex gap-5 flex-col items-center md:flex-row md:items-start">
                       <ProfilePhoto
                         image={user.userImages[0]}
                         email={user.email ?? ""}

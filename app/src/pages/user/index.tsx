@@ -297,7 +297,7 @@ function ProfilePhotosShow({
                       htmlFor="profileUploader"
                       className="cursor-pointer border-2 p-10 text-center"
                     >
-                      Нажмите или перенесите фото сюда
+                      Нажмите или перенесите фото
                       <Input
                         {...getInputProps()}
                         id="profileUploader"
@@ -372,7 +372,7 @@ function ProfilePhotosShow({
 //                   htmlFor="profileUploader"
 //                   className="cursor-pointer border-2 p-10 text-center"
 //                 >
-//                   Нажмите или перенесите фото сюда
+//                   Нажмите или перенесите фото
 //                   <Input
 //                     {...getInputProps()}
 //                     id="profileUploader"
@@ -539,6 +539,7 @@ function UserInfoShow({
             name="birthday"
             render={({ field }) => (
               <FormItem className="flex flex-col">
+                <FormLabel>Дата рождения</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -565,7 +566,7 @@ function UserInfoShow({
                       onKeyDown={birthdayDirectInputPreCallback}
                       type="text"
                       pattern="\d{2}\.\d{2}\.\d{4}"
-                      placeholder="01.01.2000"
+                      placeholder="Введите в формате 01.01.2000"
                     />
                     <Calendar
                       mode="single"
