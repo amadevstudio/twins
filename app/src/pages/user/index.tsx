@@ -68,8 +68,8 @@ import { Slider } from "@/components/ui/slider";
 import * as query from "@/utils/query/query";
 import { constants } from "@/constants";
 import { Progress } from "@/components/ui/progress";
-import {publicUrl} from "@/utils/files/public";
-import {digUserAvatar, userAvatar} from "@/pages/user/userAvatar";
+import { publicUrl } from "@/utils/files/public";
+import { digUserAvatar } from "@/pages/user/userAvatar";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
@@ -149,12 +149,18 @@ export default function User(
     refetchOnWindowFocus: false,
   });
 
+  // Separate query, used only for avatar
+  const userWithData = api.user.selfWithAvatar.useQuery(undefined, {
+    enabled: session?.user?.id !== undefined,
+    refetchOnWindowFocus: false,
+  });
+
   return (
     <div className="container">
       <div className="flex flex-col">
         {userData.data !== undefined && (
           <>
-            <ProfilePhotosShow userData={userData.data} />
+            <ProfilePhotosShow userData={userWithData.data} />
             {/*<AdditionalPhotosShow />*/}
             <UserInfoShow userData={userData.data} className="mt-10" />
           </>
@@ -167,8 +173,10 @@ export default function User(
 function ProfilePhotosShow({
   userData,
 }: {
-  userData: RouterOutput["user"]["self"];
+  userData: RouterOutput["user"]["self"] | undefined;
 }) {
+  const context = api.useUtils();
+
   const userAvatar = digUserAvatar(userData?.userImages);
 
   const [avatarLink, setAvatarLink] = useState<string | undefined>(undefined);
@@ -176,13 +184,11 @@ function ProfilePhotosShow({
     setAvatarLink(generateAvatarLink(userAvatar?.imageId));
   }, [userAvatar]);
 
+  // Editor block properties
   const [avatar, setAvatar] = useState<File | null>(null);
   const [scale, setScale] = useState<number>(1.2);
-
   const avatarEditor = useRef<AvatarEditor>(null);
-
   const [uploadProgress, setUploadProgress] = useState(0);
-
   const [isOpen, setIsOpen] = useState(false);
 
   async function uploadAvatar() {
@@ -242,7 +248,7 @@ function ProfilePhotosShow({
       return;
     }
 
-    setAvatarLink(generateAvatarLink(userAvatar?.imageId));
+    await context.user.selfWithAvatar.invalidate();
     setIsOpen(false);
     toast("Загружено!");
   }
