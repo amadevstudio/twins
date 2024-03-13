@@ -11,9 +11,30 @@ import {
 } from "@prisma/client";
 import SortOrder = Prisma.SortOrder;
 
+const userImagesQuery = {
+  include: {
+    userImages: true,
+  },
+};
+
+const userAvatarQuery = {
+  include: {
+    userImages: {
+      where: {
+        isAvatar: true,
+      },
+      orderBy: {
+        createdAt: SortOrder.desc,
+      },
+      take: 1,
+    },
+  },
+};
+
 const userBaseInfoQuery = {
   include: {
     userInfo: true,
+    ...userAvatarQuery.include
   },
 };
 
@@ -36,26 +57,6 @@ const userToKeyWordsQuery = {
       orderBy: {
         order: SortOrder.asc,
       },
-    },
-  },
-};
-
-const userImagesQuery = {
-  include: {
-    userImages: true,
-  },
-};
-
-const userAvatarQuery = {
-  include: {
-    userImages: {
-      where: {
-        isAvatar: true,
-      },
-      orderBy: {
-        createdAt: SortOrder.desc,
-      },
-      take: 1,
     },
   },
 };
@@ -118,7 +119,7 @@ export async function findById(
     include: {
       ...userBaseInfoQuery.include,
       ...userWithRegistrationTargetsQuery.include,
-      ...userAvatarQuery.include,
+      ...userImagesQuery.include,
     },
   };
   return db.user.findFirst(query);
@@ -224,7 +225,6 @@ export async function updateUserInfo(userId: string, info: queryUserType) {
       },
       where: { id: userId },
     },
-    ...userFullInfoQuery,
   });
 }
 

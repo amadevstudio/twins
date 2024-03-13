@@ -68,6 +68,8 @@ import { Slider } from "@/components/ui/slider";
 import * as query from "@/utils/query/query";
 import { constants } from "@/constants";
 import { Progress } from "@/components/ui/progress";
+import {publicUrl} from "@/utils/files/public";
+import {digUserAvatar, userAvatar} from "@/pages/user/userAvatar";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
@@ -112,7 +114,7 @@ const getFormValues = (userData: RouterOutput["user"]["self"]): TUserForm => {
 
 function generateAvatarLink(imageId: string | undefined) {
   if (imageId === undefined) return undefined;
-  return `${env.NEXT_PUBLIC_UPLOAD_PATH}/${imageId}/?date=${new Date().toString()}`;
+  return `${publicUrl(imageId)}/?date=${new Date().toString()}`;
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
@@ -167,10 +169,7 @@ function ProfilePhotosShow({
 }: {
   userData: RouterOutput["user"]["self"];
 }) {
-  const userAvatar = userData?.userImages
-    ?.filter((image) => image.isAvatar)
-    // Sort from old to new and take first (oldest)
-    ?.sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1))[0];
+  const userAvatar = digUserAvatar(userData?.userImages);
 
   const [avatarLink, setAvatarLink] = useState<string | undefined>(undefined);
   useEffect(() => {

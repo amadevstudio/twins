@@ -13,12 +13,17 @@ import React from "react";
 import { api } from "@/utils/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {UserImage} from "@prisma/client";
+import {publicUrl} from "@/utils/files/public";
+import {digUserAvatar} from "@/pages/user/userAvatar";
 export default function User() {
   const router = useRouter();
 
   const userId = String(router.query.id);
   const userQuery = api.user.findById.useQuery(userId);
   const user = userQuery.data;
+
+  const userAvatar = digUserAvatar(user?.userImages);
 
   return (
     <div className="container">
@@ -39,7 +44,7 @@ export default function User() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex">
-          <ProfilePhoto email={user?.email ?? ""} />
+          <ProfilePhoto image={userAvatar} email={user?.email ?? ""} />
           <div className="flex-col p-2">
             <div>{user?.userInfo?.additionalInfo}</div>
             <div className="flex gap-2">
@@ -60,12 +65,12 @@ export default function User() {
   );
 }
 
-function ProfilePhoto({ email }: { email: string }) {
+function ProfilePhoto({ image, email }: { image: UserImage | undefined; email: string }) {
   return (
     <div className="flex flex-col-reverse gap-10 md:flex-row">
       <div className="flex">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src="" alt={email ?? ""} />
+        <Avatar className="h-32 w-32">
+          <AvatarImage src={!!image ? publicUrl(image?.imageId) : undefined} alt={email ?? ""} />
           <AvatarFallback>{email.slice(0, 2)}</AvatarFallback>
         </Avatar>
       </div>
