@@ -14,6 +14,15 @@ const config = {
     }
   },
 
+  async rewrites() {
+    return [
+      {
+        source: "/uploads/:path*",
+        destination: "/uploads/:path*"
+      }
+    ]
+  },
+
   /**
    * If you are using `appDir` then you must comment the below `i18n` config out.
    *
