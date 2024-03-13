@@ -1,5 +1,5 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { dir } from "@/pages/api/user/uploadAvatar";
+import { dir } from "@/pages/api/files/user/uploadAvatar";
 import * as fs from "fs";
 
 export default async function handler(

@@ -207,7 +207,7 @@ function ProfilePhotosShow({
     setUploadProgress(0);
 
     const response = await query
-      .post("/api/user/uploadAvatar", formData, {
+      .post("/api/files/user/uploadAvatar", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
