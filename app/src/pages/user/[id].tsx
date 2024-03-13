@@ -9,13 +9,39 @@ import {
 } from "@/components/ui/card";
 import * as entitiesI18n from "@/utils/i18n/entities/t";
 import { age } from "@/utils/types/date";
-import React from "react";
+import React, { useEffect } from "react";
 import { api } from "@/utils/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { type UserImage } from "@prisma/client";
 import { userAvatarUrl } from "@/utils/files/uploads";
 import { digUserAvatar } from "@/utils/client/pages/user/userAvatar";
+
+// TODO: user page metadata
+// type Props = {
+//   params: { id: string };
+// };
+//
+// export async function generateMetadata(
+//   { params }: Props,
+//   _: ResolvingMetadata,
+// ): Promise<Metadata> {
+//   const user = (await fetch(`/api/rest/user/${params.id}`).then((res) =>
+//     res.json(),
+//   )) as Awaited<ReturnType<typeof userService.findById>>;
+//
+//   return {
+//     title: `${user?.name} | ${env.NEXT_PUBLIC_PROJECT_NAME}`,
+//     openGraph: {
+//       title: `${user?.name} | ${env.NEXT_PUBLIC_PROJECT_NAME}`,
+//       description:
+//         user?.userInfo?.additionalInfo === null
+//           ? undefined
+//           : user?.userInfo?.additionalInfo,
+//       siteName: env.NEXT_PUBLIC_PROJECT_NAME,
+//     },
+//   };
+// }
 
 export default function User() {
   const router = useRouter();

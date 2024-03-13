@@ -52,11 +52,6 @@ export default function Home() {
 function AuthShowcase() {
   const { data: sessionData } = useSession();
 
-  // const { data: secretMessage } = api.post.getSecretMessage.useQuery(
-  //   undefined, // no input
-  //   { enabled: sessionData?.user.ts !== undefined },
-  // );
-
   const authViaGoogle = async () => {
     await signIn("google");
   };
