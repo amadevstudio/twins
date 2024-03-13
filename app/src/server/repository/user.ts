@@ -1,6 +1,7 @@
 import { db } from "@/server/db";
 import { queryUserType, searchUserPageSize } from "@/server/api/types/user";
 import {
+  FilesProvider,
   KeyWord,
   Prisma,
   RegistrationTarget,
@@ -10,9 +11,30 @@ import {
 } from "@prisma/client";
 import SortOrder = Prisma.SortOrder;
 
+const userImagesQuery = {
+  include: {
+    userImages: true,
+  },
+};
+
+const userAvatarQuery = {
+  include: {
+    userImages: {
+      where: {
+        isAvatar: true,
+      },
+      orderBy: {
+        createdAt: SortOrder.desc,
+      },
+      take: 1,
+    },
+  },
+};
+
 const userBaseInfoQuery = {
   include: {
     userInfo: true,
+    ...userAvatarQuery.include
   },
 };
 
@@ -26,10 +48,8 @@ const userWithRegistrationTargetsQuery = {
   },
 };
 
-const userFullInfoQuery = {
+const userToKeyWordsQuery = {
   include: {
-    ...userBaseInfoQuery.include,
-    ...userWithRegistrationTargetsQuery.include,
     userToKeyWords: {
       include: {
         keyWord: true,
@@ -38,6 +58,15 @@ const userFullInfoQuery = {
         order: SortOrder.asc,
       },
     },
+  },
+};
+
+const userFullInfoQuery = {
+  include: {
+    ...userBaseInfoQuery.include,
+    ...userWithRegistrationTargetsQuery.include,
+    ...userToKeyWordsQuery.include,
+    ...userImagesQuery.include,
   },
 };
 
@@ -61,24 +90,41 @@ export async function findByEmail(
   return db.user.findFirst(query);
 }
 
-export async function findById(userId: string) {
+// type infoLevel = "base" | "registrationTargets" | "keyWords" | "images";
+
+export async function findById(
+  userId: string,
+  // takingInfo: { [K in infoLevel]?: boolean } = {
+  //   base: true,
+  //   registrationTargets: true,
+  // },
+) {
+  // takingInfo = {
+  //   base: true,
+  //   registrationTargets: true,
+  //   ...takingInfo,
+  // };
+
+  // Dynamic include concept to overwrite existing functions
+  // const include = {
+  //   ...(takingInfo?.base === true && userBaseInfoQuery.include),
+  //   ...(takingInfo?.registrationTargets === true &&
+  //     userWithRegistrationTargetsQuery.include),
+  //   ...(takingInfo.keyWords === true && userToKeyWordsQuery.include),
+  //   ...(takingInfo?.images === true && userImagesQuery.include),
+  // };
+
   const query = {
     where: { id: userId },
     include: {
       ...userBaseInfoQuery.include,
       ...userWithRegistrationTargetsQuery.include,
+      ...userImagesQuery.include,
     },
   };
   return db.user.findFirst(query);
 }
 
-// export type UserWithConnections = Prisma.UserGetPayload<{
-//   include: {
-//     userInfo: true;
-//     userToKeyWords: true;
-//     userToRegistrationTargets: true;
-//   };
-// }>;
 export async function findByIdWithInfo(userId: string) {
   const query = {
     ...{ where: { id: userId } },
@@ -179,7 +225,6 @@ export async function updateUserInfo(userId: string, info: queryUserType) {
       },
       where: { id: userId },
     },
-    ...userFullInfoQuery,
   });
 }
 
@@ -248,4 +293,30 @@ export async function updateKeyWordsConnections(
       }),
     ),
   );
+}
+
+export async function updateImage(
+  userId: string,
+  imageProvider: FilesProvider,
+  imageId: string,
+  isAvatar: boolean,
+) {
+  return db.userImage.upsert({
+    where: {
+      userId: userId,
+      isAvatar: isAvatar,
+    },
+    update: {
+      imageProvider: imageProvider,
+      imageId: imageId,
+      updatedAt: new Date()
+    },
+    create: {
+      userId: userId,
+      isAvatar: isAvatar,
+      imageProvider: imageProvider,
+      imageId: imageId,
+      updatedAt: new Date()
+    },
+  });
 }

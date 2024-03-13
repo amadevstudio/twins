@@ -1,7 +1,5 @@
 import { signIn, useSession } from "@/utils/auth/auth";
 
-import { Roboto } from "next/font/google";
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { searchUserSchema } from "@/server/api/types/user";
@@ -12,12 +10,6 @@ import React from "react";
 import { useRouter } from "next/router";
 import { constructSearchUrl } from "@/utils/view/search/helper";
 import SearchForm from "@/components/base/search";
-
-export const projectFont = Roboto({
-  weight: "400",
-  subsets: ["latin"],
-  display: "auto",
-});
 
 export default function Home() {
   const router = useRouter();

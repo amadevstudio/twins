@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -26,7 +27,10 @@ import {
   userSexAllowed,
 } from "@/server/api/types/user";
 import { authOptions } from "@/server/auth";
-import type { GetServerSidePropsContext } from "next";
+import type {
+  GetServerSidePropsContext,
+  InferGetServerSidePropsType,
+} from "next";
 import {
   Popover,
   PopoverContent,
@@ -35,7 +39,7 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parse } from "date-fns";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   addictWithDots,
   isDateBad,
@@ -49,13 +53,35 @@ import { serverSideHelper } from "@/pages/api/trpc/[trpc]";
 import { Checkbox } from "@/components/ui/checkbox";
 import * as entitiesI18n from "@/utils/i18n/entities/t";
 import { toast } from "sonner";
+import AvatarEditor from "react-avatar-editor";
+import Dropzone from "react-dropzone";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
+import * as query from "@/utils/query/query";
+import { constants } from "@/constants";
+import { Progress } from "@/components/ui/progress";
+import { publicUrl } from "@/utils/files/public";
+import { digUserAvatar } from "@/pages/user/userAvatar";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
+type TUserForm = ProtoExtends<
+  queryUserType,
+  {
+    sex: "MALE" | "FEMALE" | undefined;
+  }
+>;
+
 const prepareKeyWordsToShow = (
-  userToKeyWords:
-    | { order: number; keyWord: { keyWord: string } }[]
-    | undefined,
+  userToKeyWords: { order: number; keyWord: { keyWord: string } }[] | undefined,
 ) => {
   if (userToKeyWords === undefined) return "";
 
@@ -86,6 +112,11 @@ const getFormValues = (userData: RouterOutput["user"]["self"]): TUserForm => {
   };
 };
 
+function generateAvatarLink(imageId: string | undefined) {
+  if (imageId === undefined) return undefined;
+  return `${publicUrl(imageId)}/?date=${new Date().toString()}`;
+}
+
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getServerSession(context.req, context.res, authOptions);
 
@@ -108,17 +139,18 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   };
 }
 
-type TUserForm = ProtoExtends<
-  queryUserType,
-  {
-    sex: "MALE" | "FEMALE" | undefined;
-  }
->;
-
-export default function User() {
+export default function User(
+  props: InferGetServerSidePropsType<typeof getServerSideProps>,
+) {
   const { data: session } = useSession();
 
   const userData = api.user.self.useQuery(undefined, {
+    enabled: session?.user?.id !== undefined,
+    refetchOnWindowFocus: false,
+  });
+
+  // Separate query, used only for avatar
+  const userWithData = api.user.selfWithAvatar.useQuery(undefined, {
     enabled: session?.user?.id !== undefined,
     refetchOnWindowFocus: false,
   });
@@ -128,11 +160,9 @@ export default function User() {
       <div className="flex flex-col">
         {userData.data !== undefined && (
           <>
-            <ProfilePhotosShow session={session} />
-            <UserInfoShow
-              userData={userData.data}
-              className="mt-10"
-            />
+            <ProfilePhotosShow userData={userWithData.data} />
+            {/*<AdditionalPhotosShow />*/}
+            <UserInfoShow userData={userData.data} className="mt-10" />
           </>
         )}
       </div>
@@ -140,22 +170,228 @@ export default function User() {
   );
 }
 
-function ProfilePhotosShow({ session }: { session: Session | null }) {
+function ProfilePhotosShow({
+  userData,
+}: {
+  userData: RouterOutput["user"]["selfWithAvatar"] | undefined;
+}) {
+  const context = api.useUtils();
+
+  const userAvatar = digUserAvatar(userData?.userImages);
+
+  const [avatarLink, setAvatarLink] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    setAvatarLink(generateAvatarLink(userAvatar?.imageId));
+  }, [userAvatar]);
+
+  // Editor block properties
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [scale, setScale] = useState<number>(1.2);
+  const avatarEditor = useRef<AvatarEditor>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
+
+  async function uploadAvatar() {
+    if (!avatarEditor.current) {
+      return;
+    }
+
+    const dataUrl = avatarEditor.current.getImage().toDataURL();
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+
+    const formData = new FormData();
+
+    formData.append("image", blob);
+
+    setUploadProgress(0);
+
+    const response = await query
+      .post("/api/user/uploadAvatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total === undefined) {
+            return;
+          }
+
+          setUploadProgress(
+            Math.round((progressEvent.loaded * 100) / progressEvent.total),
+          );
+        },
+      })
+      .catch(function (error: query.error) {
+        if (error.response) {
+          if (error.response.status === 413) {
+            toast(
+              `Слишком большой файл, допустимо ${constants.MAX_IMAGE_SIZE_MB}Мб`,
+            );
+          } else if (error.response.status == 401) {
+            toast("Для этого действия надо войти в аккаунт");
+          } else {
+            toast("Возникла ошибка, свяжитесь с поддержкой");
+          }
+          console.log(error.response);
+        } else if (error.request) {
+          toast("Возникла ошибка, свяжитесь с поддержкой");
+          console.log(error.request);
+        } else {
+          toast("Возникла ошибка, свяжитесь с поддержкой");
+          console.log(error.message);
+        }
+      });
+
+    setUploadProgress(100);
+
+    if (response === undefined) {
+      return;
+    }
+
+    await context.user.selfWithAvatar.invalidate();
+    setIsOpen(false);
+    toast("Загружено!");
+  }
+
   return (
-    <div className="flex flex-col-reverse gap-10 pt-20 md:flex-row">
-      {/*<div className="flex flex-col">*/}
-      {/*  <Label htmlFor="profileUploader">Загрузите до 5 своих фотографий</Label>*/}
-      {/*  <Input id="profileUploader" type="file" className="flex-1" />*/}
-      {/*</div>*/}
-      <div className="flex">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src="" alt={session?.user?.email ?? ""} />
-          <AvatarFallback>{session?.user?.email?.slice(0, 2)}</AvatarFallback>
-        </Avatar>
-      </div>
+    <div>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <div className="m-auto flex w-min cursor-pointer flex-col items-center gap-2">
+            <Avatar className="h-32 w-32">
+              <AvatarImage src={avatarLink} alt={userData?.email ?? ""} />
+              <AvatarFallback>{userData?.email?.slice(0, 2)}</AvatarFallback>
+            </Avatar>
+            <Button>Выберите фото профиля</Button>
+          </div>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          {uploadProgress > 0 && uploadProgress < 100 && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Загрузка</DialogTitle>
+              </DialogHeader>
+              <Progress value={uploadProgress} />
+            </>
+          )}
+          {(uploadProgress === 0 || uploadProgress === 100) && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Фото профиля</DialogTitle>
+                <DialogDescription>
+                  Выберите и отредактируйте фото профиля. Не забудьте сохранить
+                  перед выходом
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4">
+                <Dropzone
+                  onDrop={(dropped) =>
+                    setAvatar(!!dropped[0] ? dropped[0] : null)
+                  }
+                  noClick
+                  noKeyboard
+                >
+                  {({ getRootProps, getInputProps }) => (
+                    <Label
+                      {...getRootProps()}
+                      htmlFor="profileUploader"
+                      className="cursor-pointer border-2 p-10 text-center"
+                    >
+                      Нажмите или перенесите фото сюда
+                      <Input
+                        {...getInputProps()}
+                        id="profileUploader"
+                        type="file"
+                      />
+                    </Label>
+                  )}
+                </Dropzone>
+                {avatar && (
+                  <div className="flex flex-col gap-4">
+                    <AvatarEditor
+                      ref={avatarEditor}
+                      image={avatar}
+                      width={250}
+                      height={250}
+                      border={50}
+                      color={[255, 255, 255, 0.6]}
+                      scale={scale}
+                      rotate={0}
+                      borderRadius={125}
+                    />
+                    <Slider
+                      onValueChange={(value) => setScale(value[0] ?? 1)}
+                      defaultValue={[scale]}
+                      min={1}
+                      max={2}
+                      step={0.05}
+                    />
+                  </div>
+                )}
+              </div>
+              {avatar && (
+                <DialogFooter>
+                  <Button onClick={uploadAvatar}>Сохранить</Button>
+                </DialogFooter>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
+// function AdditionalPhotosShow() {
+//   const [photos, setPhotos] = useState<(File | null)[]>([]);
+//
+//   return (
+//     <div>
+//       <Dialog>
+//         <DialogTrigger asChild>
+//           <div className="flex cursor-pointer flex-col gap-2">
+//             <Button>Загрузите дополнительные фото</Button>
+//           </div>
+//         </DialogTrigger>
+//         <DialogContent className="sm:max-w-[425px]">
+//           <DialogHeader>
+//             <DialogTitle>Фото</DialogTitle>
+//             <DialogDescription>
+//               Загрузите до 5 штук. Не забудьте сохранить перед выходом
+//             </DialogDescription>
+//           </DialogHeader>
+//           <div className="flex flex-col gap-4">
+//             <Dropzone
+//               onDrop={(dropped) => setPhotos(dropped)}
+//               noClick
+//               noKeyboard
+//             >
+//               {({ getRootProps, getInputProps }) => (
+//                 <Label
+//                   {...getRootProps()}
+//                   htmlFor="profileUploader"
+//                   className="cursor-pointer border-2 p-10 text-center"
+//                 >
+//                   Нажмите или перенесите фото сюда
+//                   <Input
+//                     {...getInputProps()}
+//                     id="profileUploader"
+//                     type="file"
+//                     multiple={true}
+//                   />
+//                 </Label>
+//               )}
+//             </Dropzone>
+//             {photos.map((photo) => JSON.stringify(photo))}
+//           </div>
+//           <DialogFooter>
+//             <Button type="submit">Сохранить</Button>
+//           </DialogFooter>
+//         </DialogContent>
+//       </Dialog>
+//     </div>
+//   );
+// }
 
 function UserInfoShow({
   className,
@@ -180,7 +416,7 @@ function UserInfoShow({
     defaultValues: getFormValues(userData),
   });
 
-  const [birthdayDirectInput, setBirthdayDirectInput] = React.useState(
+  const [birthdayDirectInput, setBirthdayDirectInput] = useState(
     userData?.userInfo?.birthday ? showDate(userData.userInfo.birthday) : "",
   );
 
@@ -224,7 +460,6 @@ function UserInfoShow({
   const userUpdateMutation = api.user.update.useMutation({
     async onSuccess() {
       await context.user.self.invalidate();
-      form.reset(getFormValues(userData));
       toast("Сохранено");
     },
   });

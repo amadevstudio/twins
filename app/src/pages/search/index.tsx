@@ -41,6 +41,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { emailSchema } from "@/server/api/types/searchQuery";
 import { localGetItem, localSetItem } from "@/utils/localStorageMiddleware";
+import {publicUrl} from "@/utils/files/public";
+import {UserImage} from "@prisma/client";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
@@ -137,7 +139,7 @@ function SearchResults({
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="flex">
-                      <ProfilePhoto email={user.email ?? ""} />
+                      <ProfilePhoto image={user.userImages[0]} email={user.email ?? ""} />
                       <div className="p-2">{user.userInfo?.additionalInfo}</div>
                     </CardContent>
                     <CardFooter>{user.userInfo?.contacts}</CardFooter>
@@ -350,12 +352,12 @@ function AnonSubscribeAction({ searchQuery }: { searchQuery: string }) {
   );
 }
 
-function ProfilePhoto({ email }: { email: string }) {
+function ProfilePhoto({ image, email }: { image: UserImage | undefined; email: string }) {
   return (
     <div className="flex flex-col-reverse gap-10 md:flex-row">
       <div className="flex">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src="" alt={email ?? ""} />
+        <Avatar className="h-32 w-32">
+          <AvatarImage src={!!image ? publicUrl(image?.imageId) : undefined} alt={email ?? ""} />
           <AvatarFallback>{email.slice(0, 2)}</AvatarFallback>
         </Avatar>
       </div>
