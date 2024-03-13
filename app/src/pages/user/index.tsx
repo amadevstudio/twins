@@ -66,7 +66,6 @@ import {
 } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
 import * as query from "@/utils/query/query";
-import { AxiosError } from "axios";
 import { constants } from "@/constants";
 import { Progress } from "@/components/ui/progress";
 
@@ -111,6 +110,11 @@ const getFormValues = (userData: RouterOutput["user"]["self"]): TUserForm => {
   };
 };
 
+function generateAvatarLink(imageId: string | undefined) {
+  if (imageId === undefined) return undefined;
+  return `${env.NEXT_PUBLIC_UPLOAD_PATH}/${imageId}/?date=${new Date().toString()}`;
+}
+
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getServerSession(context.req, context.res, authOptions);
 
@@ -143,12 +147,20 @@ export default function User(
     refetchOnWindowFocus: false,
   });
 
+  const avatarData = api.user.selfAvatar.useQuery(undefined, {
+    enabled: session?.user?.id !== undefined,
+    refetchOnWindowFocus: false,
+  });
+
   return (
     <div className="container">
       <div className="flex flex-col">
         {userData.data !== undefined && (
           <>
-            <ProfilePhotosShow userData={userData.data} />
+            <ProfilePhotosShow
+              userData={userData.data}
+              avatarData={avatarData.data}
+            />
             {/*<AdditionalPhotosShow />*/}
             <UserInfoShow userData={userData.data} className="mt-10" />
           </>
@@ -160,10 +172,17 @@ export default function User(
 
 function ProfilePhotosShow({
   userData,
+  avatarData,
 }: {
   userData: RouterOutput["user"]["self"];
+  avatarData: RouterOutput["user"]["selfAvatar"] | undefined;
 }) {
-  const userAvatar = userData?.userImages?.filter((image) => image.isAvatar)[0];
+  const userAvatar = avatarData?.filter((image) => image.isAvatar)[0];
+
+  const [avatarLink, setAvatarLink] = useState(undefined);
+  useEffect(() => {
+    setAvatarLink(generateAvatarLink(userAvatar?.imageId));
+  }, [userAvatar]);
 
   const [avatar, setAvatar] = useState<File | null>(null);
   const [scale, setScale] = useState<number>(1.2);
@@ -171,6 +190,8 @@ function ProfilePhotosShow({
   const avatarEditor = useRef<AvatarEditor>(null);
 
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  const [isOpen, setIsOpen] = useState(false);
 
   async function uploadAvatar() {
     if (!avatarEditor.current) {
@@ -197,10 +218,9 @@ function ProfilePhotosShow({
             return;
           }
 
-          const progress = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total,
+          setUploadProgress(
+            Math.round((progressEvent.loaded * 100) / progressEvent.total),
           );
-          console.log(`Upload Progress: ${progress}%`);
         },
       })
       .catch(function (error: query.error) {
@@ -210,7 +230,7 @@ function ProfilePhotosShow({
               `Слишком большой файл, допустимо ${constants.MAX_IMAGE_SIZE_MB}Мб`,
             );
           } else if (error.response.status == 401) {
-            toast("Для этого действия надо ввойти в аккаунт");
+            toast("Для этого действия надо войти в аккаунт");
           } else {
             toast("Возникла ошибка, свяжитесь с поддержкой");
           }
@@ -230,23 +250,18 @@ function ProfilePhotosShow({
       return;
     }
 
+    setAvatarLink(generateAvatarLink(userAvatar?.imageId));
+    setIsOpen(false);
     toast("Загружено!");
   }
 
   return (
     <div>
-      <Dialog>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <div className="flex cursor-pointer flex-col gap-2">
-            <Avatar className="h-16 w-16">
-              <AvatarImage
-                src={
-                  userAvatar !== undefined
-                    ? `${env.NEXT_PUBLIC_UPLOAD_PATH}/${userAvatar.imageId}`
-                    : undefined
-                }
-                alt={userData?.email ?? ""}
-              />
+          <div className="m-auto flex w-min cursor-pointer flex-col items-center gap-2">
+            <Avatar className="h-32 w-32">
+              <AvatarImage src={avatarLink} alt={userData?.email ?? ""} />
               <AvatarFallback>{userData?.email?.slice(0, 2)}</AvatarFallback>
             </Avatar>
             <Button>Выберите фото профиля</Button>

@@ -6,7 +6,6 @@ import { env } from "@/env";
 import * as fs from "fs";
 import { getSession } from "next-auth/react";
 import * as userService from "@/server/service/user";
-import { updateImage } from "@/server/service/user";
 
 export const config = {
   api: {

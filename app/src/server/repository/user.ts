@@ -27,17 +27,8 @@ const userWithRegistrationTargetsQuery = {
   },
 };
 
-const userImagesQuery = {
+const userToKeyWordsQuery = {
   include: {
-    userImages: true,
-  },
-};
-
-const userFullInfoQuery = {
-  include: {
-    ...userBaseInfoQuery.include,
-    ...userWithRegistrationTargetsQuery.include,
-    ...userImagesQuery.include,
     userToKeyWords: {
       include: {
         keyWord: true,
@@ -46,6 +37,14 @@ const userFullInfoQuery = {
         order: SortOrder.asc,
       },
     },
+  },
+};
+
+const userFullInfoQuery = {
+  include: {
+    ...userBaseInfoQuery.include,
+    ...userWithRegistrationTargetsQuery.include,
+    ...userToKeyWordsQuery.include,
   },
 };
 
@@ -69,7 +68,30 @@ export async function findByEmail(
   return db.user.findFirst(query);
 }
 
-export async function findById(userId: string) {
+// type infoLevel = "base" | "registrationTargets" | "keyWords" | "images";
+
+export async function findById(
+  userId: string,
+  // takingInfo: { [K in infoLevel]?: boolean } = {
+  //   base: true,
+  //   registrationTargets: true,
+  // },
+) {
+  // takingInfo = {
+  //   base: true,
+  //   registrationTargets: true,
+  //   ...takingInfo,
+  // };
+
+  // Dynamic include concept to overwrite existing functions
+  // const include = {
+  //   ...(takingInfo?.base === true && userBaseInfoQuery.include),
+  //   ...(takingInfo?.registrationTargets === true &&
+  //     userWithRegistrationTargetsQuery.include),
+  //   ...(takingInfo.keyWords === true && userToKeyWordsQuery.include),
+  //   ...(takingInfo?.images === true && userImagesQuery.include),
+  // };
+
   const query = {
     where: { id: userId },
     include: {
@@ -80,19 +102,19 @@ export async function findById(userId: string) {
   return db.user.findFirst(query);
 }
 
-// export type UserWithConnections = Prisma.UserGetPayload<{
-//   include: {
-//     userInfo: true;
-//     userToKeyWords: true;
-//     userToRegistrationTargets: true;
-//   };
-// }>;
 export async function findByIdWithInfo(userId: string) {
   const query = {
     ...{ where: { id: userId } },
     ...userFullInfoQuery,
   };
   return db.user.findFirst(query);
+}
+
+export async function findAvatarById(userId: string) {
+  const query = {
+    where: { userId: userId, isAvatar: true },
+  };
+  return db.userImage.findMany(query);
 }
 
 export async function findByKeyWords(
