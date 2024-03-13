@@ -68,7 +68,7 @@ import { Slider } from "@/components/ui/slider";
 import * as query from "@/utils/query/query";
 import { constants } from "@/constants";
 import { Progress } from "@/components/ui/progress";
-import { publicUrl } from "@/utils/files/public";
+import { userAvatarUrl } from "@/utils/files/uploads";
 import { digUserAvatar } from "@/utils/client/pages/user/userAvatar";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
@@ -114,7 +114,7 @@ const getFormValues = (userData: RouterOutput["user"]["self"]): TUserForm => {
 
 function generateAvatarLink(imageId: string | undefined) {
   if (imageId === undefined) return undefined;
-  return `${publicUrl(imageId)}/?date=${new Date().toString()}`;
+  return `${userAvatarUrl(imageId)}&timestamp=${new Date().getTime()}`;
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {

@@ -40,9 +40,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { emailSchema } from "@/server/api/types/searchQuery";
-import { localGetItem, localSetItem } from "@/utils/client/localStorageMiddleware";
-import {publicUrl} from "@/utils/files/public";
-import {UserImage} from "@prisma/client";
+import {
+  localGetItem,
+  localSetItem,
+} from "@/utils/client/localStorageMiddleware";
+import { userAvatarUrl } from "@/utils/files/uploads";
+import { type UserImage } from "@prisma/client";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
@@ -139,7 +142,10 @@ function SearchResults({
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="flex">
-                      <ProfilePhoto image={user.userImages[0]} email={user.email ?? ""} />
+                      <ProfilePhoto
+                        image={user.userImages[0]}
+                        email={user.email ?? ""}
+                      />
                       <div className="p-2">{user.userInfo?.additionalInfo}</div>
                     </CardContent>
                     <CardFooter>{user.userInfo?.contacts}</CardFooter>
@@ -247,10 +253,10 @@ function AnonSubscribeAction({ searchQuery }: { searchQuery: string }) {
   });
 
   const localUserEmail = localGetItem("anonUserEmail");
-  const userAnonQuery = api.user.getUserAnon.useQuery(
-    undefined,
-    { enabled: localUserEmail === null, refetchOnWindowFocus: false },
-  );
+  const userAnonQuery = api.user.getUserAnon.useQuery(undefined, {
+    enabled: localUserEmail === null,
+    refetchOnWindowFocus: false,
+  });
   useEffect(() => {
     if (localUserEmail !== null) form.setValue("email", localUserEmail);
   }, [form, localUserEmail]);
@@ -352,12 +358,21 @@ function AnonSubscribeAction({ searchQuery }: { searchQuery: string }) {
   );
 }
 
-function ProfilePhoto({ image, email }: { image: UserImage | undefined; email: string }) {
+function ProfilePhoto({
+  image,
+  email,
+}: {
+  image: UserImage | undefined;
+  email: string;
+}) {
   return (
     <div className="flex flex-col-reverse gap-10 md:flex-row">
       <div className="flex">
         <Avatar className="h-32 w-32">
-          <AvatarImage src={!!image ? publicUrl(image?.imageId) : undefined} alt={email ?? ""} />
+          <AvatarImage
+            src={!!image ? userAvatarUrl(image?.imageId) : undefined}
+            alt={email ?? ""}
+          />
           <AvatarFallback>{email.slice(0, 2)}</AvatarFallback>
         </Avatar>
       </div>

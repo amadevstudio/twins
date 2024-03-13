@@ -18,6 +18,8 @@ type ResponseData = {
   error?: string;
 };
 
+export const dir = `${env.UPLOAD_PATH}`;
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>,
@@ -46,7 +48,6 @@ export default async function handler(
     const file = filesList[0];
     const prefix = "images/avatars";
     const outputFileName = `${prefix}/${userId}.jpg`;
-    const dir = `${env.UPLOAD_PATH}`;
 
     if (!fs.existsSync(`${dir}/${prefix}`)) {
       fs.mkdirSync(`${dir}/${prefix}`, { recursive: true });

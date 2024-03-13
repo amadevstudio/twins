@@ -1,8 +1,8 @@
 src/jobs/build
 
 # File uploads
-public/uploads/images/avatars/*
-!public/uploads/images/avatars/.keep
+uploads/images/avatars/*
+!uploads/images/avatars/.keep
 
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.

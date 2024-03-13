@@ -14,8 +14,9 @@ import { api } from "@/utils/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { type UserImage } from "@prisma/client";
-import { publicUrl } from "@/utils/files/public";
+import { userAvatarUrl } from "@/utils/files/uploads";
 import { digUserAvatar } from "@/utils/client/pages/user/userAvatar";
+
 export default function User() {
   const router = useRouter();
 
@@ -77,7 +78,7 @@ function ProfilePhoto({
       <div className="flex">
         <Avatar className="h-32 w-32">
           <AvatarImage
-            src={!!image ? publicUrl(image?.imageId) : undefined}
+            src={!!image ? userAvatarUrl(image?.imageId) : undefined}
             alt={email ?? ""}
           />
           <AvatarFallback>{email.slice(0, 2)}</AvatarFallback>
