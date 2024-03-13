@@ -6,8 +6,8 @@
       <excludeFolder url="file://$MODULE_DIR$/temp" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/app/src/jobs/build" />
-      <excludeFolder url="file://$MODULE_DIR$/app/public/uploads" />
       <excludeFolder url="file://$MODULE_DIR$/database/postgresql" />
+      <excludeFolder url="file://$MODULE_DIR$/app/uploads" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

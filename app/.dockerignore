@@ -1,2 +1,2 @@
-public/uploads/images/avatars/*
-!public/uploads/images/avatars/.keep
+uploads/images/avatars/*
+!uploads/images/avatars/.keep
