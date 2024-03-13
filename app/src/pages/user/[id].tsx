@@ -13,9 +13,9 @@ import React from "react";
 import { api } from "@/utils/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import {UserImage} from "@prisma/client";
-import {publicUrl} from "@/utils/files/public";
-import {digUserAvatar} from "@/pages/user/userAvatar";
+import { type UserImage } from "@prisma/client";
+import { publicUrl } from "@/utils/files/public";
+import { digUserAvatar } from "@/utils/client/pages/user/userAvatar";
 export default function User() {
   const router = useRouter();
 
@@ -65,12 +65,21 @@ export default function User() {
   );
 }
 
-function ProfilePhoto({ image, email }: { image: UserImage | undefined; email: string }) {
+function ProfilePhoto({
+  image,
+  email,
+}: {
+  image: UserImage | undefined;
+  email: string;
+}) {
   return (
     <div className="flex flex-col-reverse gap-10 md:flex-row">
       <div className="flex">
         <Avatar className="h-32 w-32">
-          <AvatarImage src={!!image ? publicUrl(image?.imageId) : undefined} alt={email ?? ""} />
+          <AvatarImage
+            src={!!image ? publicUrl(image?.imageId) : undefined}
+            alt={email ?? ""}
+          />
           <AvatarFallback>{email.slice(0, 2)}</AvatarFallback>
         </Avatar>
       </div>

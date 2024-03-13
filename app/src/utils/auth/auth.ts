@@ -9,8 +9,7 @@ import {
   type SignInOptions,
   type SignInResponse,
 } from "next-auth/react";
-import {cookies} from "next/headers";
-import {localRemoveItem} from "@/utils/localStorageMiddleware";
+import {localRemoveItem} from "@/utils/client/localStorageMiddleware";
 
 export async function signIn<
   P extends RedirectableProviderType | undefined = undefined,

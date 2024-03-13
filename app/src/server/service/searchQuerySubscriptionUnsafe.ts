@@ -1,9 +1,9 @@
-import { NextApiResponse } from "next";
+import { type NextApiResponse } from "next";
 import * as userRepo from "@/server/repository/user";
-import { AdapterUser } from "next-auth/adapters";
+import { type AdapterUser } from "next-auth/adapters";
 import { prismaAdapter } from "@/server/auth";
 import { afterCreate } from "@/server/service/user";
-import { setCookie } from "@/utils/cookies";
+import { setCookie } from "@/utils/server/cookies";
 import { subscribe } from "@/server/service/searchQuerySubscription";
 
 export async function subscribeAnon(

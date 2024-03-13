@@ -1,4 +1,4 @@
-import { UserImage } from "@prisma/client";
+import { type UserImage } from "@prisma/client";
 
 export function digUserAvatar(userImages: UserImage[] | undefined) {
   return (

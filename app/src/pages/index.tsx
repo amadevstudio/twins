@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { type z } from "zod";
 import React from "react";
 import { useRouter } from "next/router";
-import { constructSearchUrl } from "@/utils/view/search/helper";
+import { constructSearchUrl } from "@/utils/client/pages/search/search";
 import SearchForm from "@/components/base/search";
 
 export default function Home() {

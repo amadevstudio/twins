@@ -3,10 +3,10 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { cn, ProtoExtends } from "@/lib/utils";
+import { cn, type ProtoExtends } from "@/lib/utils";
 import { type z } from "zod";
 import { api } from "@/utils/api";
-import { getServerSession, type Session } from "next-auth";
+import { getServerSession } from "next-auth";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@/server/api/root";
 import {
@@ -23,7 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   queryUserSchema,
-  queryUserType,
+  type queryUserType,
   userSexAllowed,
 } from "@/server/api/types/user";
 import { authOptions } from "@/server/auth";
@@ -69,7 +69,7 @@ import * as query from "@/utils/query/query";
 import { constants } from "@/constants";
 import { Progress } from "@/components/ui/progress";
 import { publicUrl } from "@/utils/files/public";
-import { digUserAvatar } from "@/pages/user/userAvatar";
+import { digUserAvatar } from "@/utils/client/pages/user/userAvatar";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
@@ -140,7 +140,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 }
 
 export default function User(
-  props: InferGetServerSidePropsType<typeof getServerSideProps>,
+  _: InferGetServerSidePropsType<typeof getServerSideProps>,
 ) {
   const { data: session } = useSession();
 

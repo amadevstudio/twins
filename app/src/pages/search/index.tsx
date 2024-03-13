@@ -14,7 +14,7 @@ import {
   getBaseUrl,
   pageParamName,
   searchParamName,
-} from "@/utils/view/search/helper";
+} from "@/utils/client/pages/search/search";
 import PaginationConstructor from "@/components/base/pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { emailSchema } from "@/server/api/types/searchQuery";
-import { localGetItem, localSetItem } from "@/utils/localStorageMiddleware";
+import { localGetItem, localSetItem } from "@/utils/client/localStorageMiddleware";
 import {publicUrl} from "@/utils/files/public";
 import {UserImage} from "@prisma/client";
 
