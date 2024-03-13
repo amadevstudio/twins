@@ -147,20 +147,12 @@ export default function User(
     refetchOnWindowFocus: false,
   });
 
-  const avatarData = api.user.selfAvatar.useQuery(undefined, {
-    enabled: session?.user?.id !== undefined,
-    refetchOnWindowFocus: false,
-  });
-
   return (
     <div className="container">
       <div className="flex flex-col">
         {userData.data !== undefined && (
           <>
-            <ProfilePhotosShow
-              userData={userData.data}
-              avatarData={avatarData.data}
-            />
+            <ProfilePhotosShow userData={userData.data} />
             {/*<AdditionalPhotosShow />*/}
             <UserInfoShow userData={userData.data} className="mt-10" />
           </>
@@ -172,14 +164,15 @@ export default function User(
 
 function ProfilePhotosShow({
   userData,
-  avatarData,
 }: {
   userData: RouterOutput["user"]["self"];
-  avatarData: RouterOutput["user"]["selfAvatar"] | undefined;
 }) {
-  const userAvatar = avatarData?.filter((image) => image.isAvatar)[0];
+  const userAvatar = userData?.userImages
+    ?.filter((image) => image.isAvatar)
+    // Sort from old to new and take first (oldest)
+    ?.sort((a, b) => (a.createdAt > b.createdAt ? -1 : 1))[0];
 
-  const [avatarLink, setAvatarLink] = useState(undefined);
+  const [avatarLink, setAvatarLink] = useState<string | undefined>(undefined);
   useEffect(() => {
     setAvatarLink(generateAvatarLink(userAvatar?.imageId));
   }, [userAvatar]);

@@ -7,6 +7,8 @@ CREATE TABLE "UserImage" (
     "imageProvider" "FilesProvider" NOT NULL,
     "imageId" TEXT NOT NULL,
     "isAvatar" BOOLEAN NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "UserImage_pkey" PRIMARY KEY ("userId")
 );

@@ -40,10 +40,6 @@ export const user = createTRPCRouter({
     return await userService.findByIdWithInfo(ctx.session?.user?.id);
   }),
 
-  selfAvatar: protectedProcedure.query(async ({ctx}) => {
-    return await userService.findAvatarById(ctx.session?.user?.id);
-  }),
-
   update: protectedProcedure
     .input(queryUserSchema)
     .mutation(async ({ ctx, input }) => {

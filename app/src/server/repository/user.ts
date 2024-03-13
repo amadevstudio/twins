@@ -40,11 +40,32 @@ const userToKeyWordsQuery = {
   },
 };
 
+const userImagesQuery = {
+  include: {
+    userImages: true,
+  },
+};
+
+const userAvatarQuery = {
+  include: {
+    userImages: {
+      where: {
+        isAvatar: true,
+      },
+      orderBy: {
+        createdAt: SortOrder.desc,
+      },
+      take: 1,
+    },
+  },
+};
+
 const userFullInfoQuery = {
   include: {
     ...userBaseInfoQuery.include,
     ...userWithRegistrationTargetsQuery.include,
     ...userToKeyWordsQuery.include,
+    ...userImagesQuery.include,
   },
 };
 
@@ -97,6 +118,7 @@ export async function findById(
     include: {
       ...userBaseInfoQuery.include,
       ...userWithRegistrationTargetsQuery.include,
+      ...userAvatarQuery.include,
     },
   };
   return db.user.findFirst(query);
@@ -108,13 +130,6 @@ export async function findByIdWithInfo(userId: string) {
     ...userFullInfoQuery,
   };
   return db.user.findFirst(query);
-}
-
-export async function findAvatarById(userId: string) {
-  const query = {
-    where: { userId: userId, isAvatar: true },
-  };
-  return db.userImage.findMany(query);
 }
 
 export async function findByKeyWords(
@@ -294,12 +309,14 @@ export async function updateImage(
     update: {
       imageProvider: imageProvider,
       imageId: imageId,
+      updatedAt: new Date()
     },
     create: {
       userId: userId,
       isAvatar: isAvatar,
       imageProvider: imageProvider,
       imageId: imageId,
+      updatedAt: new Date()
     },
   });
 }

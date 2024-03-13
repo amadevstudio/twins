@@ -36,10 +36,6 @@ export async function findByIdWithInfo(userId: string) {
   return userRepo.findByIdWithInfo(userId);
 }
 
-export async function findAvatarById(userId: string) {
-  return userRepo.findAvatarById(userId);
-}
-
 export async function findByKeyWords(
   userId: string | undefined,
   keyWordsData: searchUserType,
