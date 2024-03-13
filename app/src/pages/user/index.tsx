@@ -173,7 +173,7 @@ export default function User(
 function ProfilePhotosShow({
   userData,
 }: {
-  userData: RouterOutput["user"]["self"] | undefined;
+  userData: RouterOutput["user"]["selfWithAvatar"] | undefined;
 }) {
   const context = api.useUtils();
 
