@@ -14,10 +14,29 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+  const shouldShowCaptionLayout =
+    props.captionLayout === "dropdown" ||
+    props.captionLayout === "dropdown-buttons";
+  if (shouldShowCaptionLayout) {
+    classNames = { ...classNames, caption_label: "hidden", vhidden: "hidden" };
+  }
+
+  const emptyDropdown = () => {
+    return "";
+  };
+  const labelYearDropdown = emptyDropdown;
+  const labelMonthDropdown = emptyDropdown;
+
   return (
     <DayPicker
       ISOWeek
       locale={ru}
+      captionLayout={props.captionLayout}
+      fromYear={
+        shouldShowCaptionLayout ? new Date().getFullYear() - 100 : undefined
+      }
+      toYear={shouldShowCaptionLayout ? new Date().getFullYear() : undefined}
+      labels={{ labelMonthDropdown, labelYearDropdown }}
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
       classNames={{
@@ -25,6 +44,8 @@ function Calendar({
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center",
         caption_label: "text-sm font-medium",
+        caption_dropdowns: "flex gap-4",
+        dropdown: "bg-transparent cursor-pointer text-right",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),

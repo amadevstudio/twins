@@ -569,6 +569,7 @@ function UserInfoShow({
                       placeholder="Введите в формате 01.01.2000"
                     />
                     <Calendar
+                      captionLayout={"dropdown-buttons"}
                       mode="single"
                       selected={field.value}
                       onSelect={(v) => {
