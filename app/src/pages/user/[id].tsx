@@ -70,11 +70,10 @@ export default function User() {
               .join(", ")}
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex gap-5 flex-col items-center md:flex-row md:items-start">
+        <CardContent className="flex flex-col items-center gap-5 md:flex-row md:items-start">
           <ProfilePhoto image={userAvatar} email={user?.email ?? ""} />
           <div className="flex-col p-2">
-            <div>{user?.userInfo?.additionalInfo}</div>
-            <div className="flex gap-2 mt-2">
+            <div className="mb-2 flex flex-wrap gap-2">
               {user?.userToRegistrationTargets?.map((utrt) => (
                 <Badge key={utrt.registrationTargetId}>
                   {entitiesI18n.t(
@@ -84,6 +83,7 @@ export default function User() {
                 </Badge>
               ))}
             </div>
+            <div>{user?.userInfo?.additionalInfo}</div>
           </div>
         </CardContent>
         <CardFooter>{user?.userInfo?.contacts}</CardFooter>

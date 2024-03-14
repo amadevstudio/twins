@@ -83,7 +83,7 @@ export default function Search() {
     <div className="container flex flex-col items-center">
       <SearchForm form={form} onSubmit={onSubmit} />
 
-      <div className="container pt-20">
+      <div className="pt-20">
         {!searchResults.data && <p>Поиск...</p>}
         {!!searchResults.data && (
           <SearchResults
