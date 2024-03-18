@@ -1,6 +1,6 @@
 import sharp from "sharp";
 import { constants } from "@/constants";
-import { NextApiRequest, NextApiResponse } from "next";
+import { type NextApiRequest, type NextApiResponse } from "next";
 import formidable from "formidable";
 import { env } from "@/env";
 import * as fs from "fs";

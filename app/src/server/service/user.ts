@@ -1,11 +1,11 @@
 import * as userRepo from "@/server/repository/user";
 import * as userInfoRepo from "@/server/repository/userInfo";
-import { queryUserType, searchUserType } from "@/server/api/types/user";
+import { type queryUserType, type searchUserType } from "@/server/api/types/user";
 import * as registrationTargetRepo from "@/server/repository/registrationTarget";
 import * as keyWordRepo from "@/server/repository/keyWord";
 import { processKeyWordsString } from "@/server/service/keyWord";
-import { FilesProvider, User } from "@prisma/client";
-import { NextApiRequest } from "next";
+import { type FilesProvider, type User } from "@prisma/client";
+import { type NextApiRequest } from "next";
 
 export async function afterCreate(user: User | null) {
   if (user === null) {

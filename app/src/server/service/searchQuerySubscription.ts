@@ -2,8 +2,8 @@ import { processKeyWordsString } from "@/server/service/keyWord";
 import * as searchQuerySubscriptionRepo from "@/server/repository/searchQuerySubscription";
 import * as keyWordRepo from "@/server/repository/keyWord";
 import * as userRepo from "@/server/repository/user";
-import { NextApiRequest } from "next";
-import { KeyWordsSubscriptionStatuses } from "@prisma/client";
+import { type NextApiRequest } from "next";
+import { type KeyWordsSubscriptionStatuses } from "@prisma/client";
 import {
   searchQueryCreatedSubscriptionMailerQueue,
   QUEUE_NAMES,

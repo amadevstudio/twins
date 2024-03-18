@@ -1,4 +1,4 @@
-import { NextApiResponse } from "next";
+import { type NextApiResponse } from "next";
 import { unsetCookie } from "@/utils/server/cookies";
 
 export function unsetAnonCookies(res: NextApiResponse | undefined) {

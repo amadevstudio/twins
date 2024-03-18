@@ -1,15 +1,15 @@
-import {z} from "zod";
-import {searchUserSchema} from "@/server/api/types/user";
+import { type z } from "zod";
+import { type searchUserSchema } from "@/server/api/types/user";
 
-export const pageParamName = "p"
-export const searchParamName = "q"
+export const pageParamName = "p";
+export const searchParamName = "q";
 
 export function getBaseUrl(query: string) {
   return `/search?
-${searchParamName}=${query}`
+${searchParamName}=${query}`;
 }
 
 export function constructSearchUrl(data: z.infer<typeof searchUserSchema>) {
   return `${getBaseUrl(data.query)}
-${!!data.page ? `&page=${data.page}` : ""}`
+${!!data.page ? `&page=${data.page}` : ""}`;
 }

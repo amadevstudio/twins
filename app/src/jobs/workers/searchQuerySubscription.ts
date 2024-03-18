@@ -1,4 +1,4 @@
-import { Job, Worker } from "bullmq";
+import { type Job, Worker } from "bullmq";
 
 import * as redis_conf from "../redis_conf";
 import {
@@ -15,7 +15,8 @@ import { QUEUE_NAMES as REPEATABLE_QUEUE_NAMES } from "@/jobs/queues/repeatable/
 import { findUserIntersection } from "@/server/service/searchQuerySubscription";
 import { type KeyWordsSubscription } from "@prisma/client";
 
-const sendCreatedMailWorker = new Worker(
+// const sendCreatedMailWorker =
+new Worker(
   MAILER_QUEUE_NAME.CREATED,
   async (job: Job<KeyWordsSubscription, void, string>) => {
     const user = await userService.findById(job.data.userId);
@@ -39,7 +40,8 @@ const sendCreatedMailWorker = new Worker(
   },
 );
 
-const sendSuccessMailWorker = new Worker(
+// const sendSuccessMailWorker  =
+new Worker(
   MAILER_QUEUE_NAME.COMPLETED,
   async (
     job: Job<

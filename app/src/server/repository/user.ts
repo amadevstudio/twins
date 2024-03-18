@@ -1,13 +1,13 @@
 import { db } from "@/server/db";
-import { queryUserType, searchUserPageSize } from "@/server/api/types/user";
+import { type queryUserType, searchUserPageSize } from "@/server/api/types/user";
 import {
-  FilesProvider,
-  KeyWord,
+  type FilesProvider,
+  type KeyWord,
   Prisma,
-  RegistrationTarget,
-  User,
-  UserToKeyWord,
-  UserToRegistrationTarget,
+  type RegistrationTarget,
+  type User,
+  type UserToKeyWord,
+  type UserToRegistrationTarget,
 } from "@prisma/client";
 import SortOrder = Prisma.SortOrder;
 

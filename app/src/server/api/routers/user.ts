@@ -4,22 +4,17 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { z } from "zod";
-import {
-  queryUserSchema,
-  searchUserSchema,
-  searchUserType,
-} from "@/server/api/types/user";
-
+import { queryUserSchema, searchUserSchema } from "@/server/api/types/user";
 import * as userService from "@/server/service/user";
 
 export const user = createTRPCRouter({
   findByEmail: publicProcedure
     .input(z.string().email())
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       return await userService.findByEmail(input);
     }),
 
-  findById: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+  findById: publicProcedure.input(z.string()).query(async ({ input }) => {
     return await userService.findById(input);
   }),
 
@@ -29,10 +24,9 @@ export const user = createTRPCRouter({
       return await userService.findByKeyWords(ctx.session?.user?.id, input);
     }),
 
-  getUserAnon: publicProcedure
-    .query(async ({ctx}) => {
-      return await userService.findByReqIdAnon(ctx.req!);
-    }),
+  getUserAnon: publicProcedure.query(async ({ ctx }) => {
+    return await userService.findByReqIdAnon(ctx.req!);
+  }),
 
   // Protected below
 

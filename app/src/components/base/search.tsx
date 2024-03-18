@@ -8,9 +8,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import React from "react";
-import { searchUserSchema } from "@/server/api/types/user";
-import { UseFormReturn } from "react-hook-form";
-import { z } from "zod";
+import { type searchUserSchema } from "@/server/api/types/user";
+import { type UseFormReturn } from "react-hook-form";
+import { type z } from "zod";
 
 export default function SearchForm({
   form,

@@ -1,4 +1,3 @@
-import { searchUserPageSize } from "@/server/api/types/user";
 import {
   Pagination,
   PaginationContent,

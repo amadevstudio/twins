@@ -1,7 +1,7 @@
 import { createBullBoard } from "@bull-board/api";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { ExpressAdapter } from "@bull-board/express";
-import express, { RequestHandler } from "express";
+import express, { type RequestHandler } from "express";
 
 import { config } from "@/jobs/queues/repeatable/config";
 import { Queue } from "bullmq";
@@ -25,7 +25,8 @@ createBullBoard({
   serverAdapter,
 });
 
-const handler = express().use(
+// const handler =
+express().use(
   basePath,
   serverAdapter.getRouter() as RequestHandler,
 );

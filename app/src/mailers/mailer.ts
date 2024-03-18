@@ -1,7 +1,6 @@
-import { createTransport, TransportOptions } from "nodemailer";
-import { html, text } from "@/pages/api/auth/magic-link";
+import { createTransport } from "nodemailer";
 import { env } from "@/env";
-import SMTPTransport from "nodemailer/lib/smtp-transport";
+import type SMTPTransport from "nodemailer/lib/smtp-transport";
 
 const provider: { server: SMTPTransport.Options; from: string } = {
   server: {

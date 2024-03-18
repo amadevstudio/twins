@@ -1,5 +1,5 @@
 import { escapedHost, mailer } from "@/mailers/mailer";
-import { color, brandColor } from "@/mailers/mailer";
+import { color } from "@/mailers/mailer";
 import { env } from "@/env";
 
 export async function searchQuerySubscriptionCreatedMailer(

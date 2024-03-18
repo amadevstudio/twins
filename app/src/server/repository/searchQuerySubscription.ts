@@ -1,7 +1,7 @@
 import {
-  KeyWord,
-  KeyWordsSubscription,
-  KeyWordsSubscriptionStatuses,
+  type KeyWord,
+  type KeyWordsSubscription,
+  type KeyWordsSubscriptionStatuses,
 } from "@prisma/client";
 import { db } from "@/server/db";
 

@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import Header from "@/components/base/header";
 import { Toaster } from "@/components/ui/sonner";
 import { Roboto } from "next/font/google";
-import { Metadata } from "next";
 
 export const projectFont = Roboto({
   weight: "400",

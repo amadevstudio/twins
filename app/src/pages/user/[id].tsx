@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import * as entitiesI18n from "@/utils/i18n/entities/t";
 import { age } from "@/utils/types/date";
-import React, { useEffect } from "react";
+import React from "react";
 import { api } from "@/utils/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
