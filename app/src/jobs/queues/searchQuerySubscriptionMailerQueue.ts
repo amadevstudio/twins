@@ -22,9 +22,19 @@ export function getSearchQueryCreatedSubscriptionMailerQueue() {
   return searchQueryCreatedSubscriptionMailerQueue;
 }
 
-export const searchQueryCompletedSubscriptionMailerQueue = new Queue(
-  QUEUE_NAMES.COMPLETED,
-  {
-    connection: redis_conf.config,
-  },
-);
+let searchQueryCompletedSubscriptionMailerQueue: Queue<
+  { id: string; searcher_id: string; candidate_id: string },
+  void,
+  string
+>;
+export function getSearchQueryCompletedSubscriptionMailerQueue() {
+  if (!searchQueryCompletedSubscriptionMailerQueue) {
+    searchQueryCompletedSubscriptionMailerQueue = new Queue(
+      QUEUE_NAMES.COMPLETED,
+      {
+        connection: redis_conf.config,
+      },
+    );
+  }
+  return searchQueryCompletedSubscriptionMailerQueue;
+}
