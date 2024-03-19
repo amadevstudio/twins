@@ -5,7 +5,7 @@ import * as userRepo from "@/server/repository/user";
 import { type NextApiRequest } from "next";
 import { type KeyWordsSubscriptionStatuses } from "@prisma/client";
 import {
-  searchQueryCreatedSubscriptionMailerQueue,
+  getSearchQueryCreatedSubscriptionMailerQueue,
   QUEUE_NAMES,
 } from "@/jobs/queues/searchQuerySubscriptionMailerQueue";
 
@@ -53,7 +53,7 @@ export async function subscribe(userId: string, searchQuery: string) {
     newKeyWordsCreated,
   );
 
-  await searchQueryCreatedSubscriptionMailerQueue.add(
+  await getSearchQueryCreatedSubscriptionMailerQueue().add(
     `${QUEUE_NAMES.CREATED} for ${newSubscription.userId}, subscriptionId is ${newSubscription.id}`,
     newSubscription,
   );
