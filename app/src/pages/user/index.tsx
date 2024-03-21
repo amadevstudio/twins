@@ -191,6 +191,41 @@ function ProfilePhotosShow({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
+  const acceptedImages = ["jpeg", "png", "heic"];
+
+  async function convertHeicToJpeg(heic: File): Promise<File | null> {
+    if (typeof window !== "undefined") {
+      const heic2any = (await import("heic2any")).default; // Dynamic import
+      return new File(
+        [(await heic2any({ blob: heic, toType: "image/jpeg" })) as Blob],
+        heic.name,
+      );
+    }
+    return null;
+  }
+
+  async function avatarDropped(dropped: File[]) {
+    if (!dropped[0]) {
+      setAvatar(null);
+      return;
+    }
+
+    const avatar = dropped[0];
+    if (!acceptedImages.map((ai) => `image/${ai}`).includes(avatar.type)) {
+      toast(
+        `Возможна загрузка только следующих типов: ${acceptedImages.join(", ")}`,
+      );
+      setAvatar(null);
+      return;
+    }
+
+    if (avatar.type === "image/heic") {
+      setAvatar(await convertHeicToJpeg(avatar));
+    } else {
+      setAvatar(avatar);
+    }
+  }
+
   async function uploadAvatar() {
     if (!avatarEditor.current) {
       return;
@@ -285,11 +320,10 @@ function ProfilePhotosShow({
               </DialogHeader>
               <div className="flex flex-col gap-4">
                 <Dropzone
-                  onDrop={(dropped) =>
-                    setAvatar(!!dropped[0] ? dropped[0] : null)
-                  }
+                  onDrop={avatarDropped}
                   noClick
                   noKeyboard
+                  accept={{ "image/*": acceptedImages.map((ai) => `.${ai}`) }}
                 >
                   {({ getRootProps, getInputProps }) => (
                     <Label
