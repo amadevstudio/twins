@@ -70,6 +70,7 @@ import { constants } from "@/constants";
 import { Progress } from "@/components/ui/progress";
 import { userAvatarUrl } from "@/utils/files/uploads";
 import { digUserAvatar } from "@/utils/client/pages/user/userAvatar";
+import Loader from "@/components/ui/loader";
 
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
@@ -176,6 +177,12 @@ function ProfilePhotosShow({
   userData: RouterOutput["user"]["selfWithAvatar"] | undefined;
 }) {
   const context = api.useUtils();
+  const [editorSize, setEditorSize] = useState(250);
+  useEffect(() => {
+    if (window.screen.width < 400) {
+      setEditorSize(150);
+    }
+  }, []);
 
   const userAvatar = digUserAvatar(userData?.userImages);
 
@@ -190,6 +197,8 @@ function ProfilePhotosShow({
   const avatarEditor = useRef<AvatarEditor>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
+  const [isSlowConvertingMessage, setIsSlowConvertingMessage] = useState(false);
 
   const acceptedImages = ["jpeg", "png", "heic"];
 
@@ -197,7 +206,13 @@ function ProfilePhotosShow({
     if (typeof window !== "undefined") {
       const heic2any = (await import("heic2any")).default; // Dynamic import
       return new File(
-        [(await heic2any({ blob: heic, toType: "image/jpeg" })) as Blob],
+        [
+          (await heic2any({
+            blob: heic,
+            toType: "image/jpeg",
+            quality: 0.8,
+          })) as Blob,
+        ],
         heic.name,
       );
     }
@@ -219,11 +234,22 @@ function ProfilePhotosShow({
       return;
     }
 
+    setIsConverting(true);
     if (avatar.type === "image/heic") {
-      setAvatar(await convertHeicToJpeg(avatar));
+      const timerId = setTimeout(() => {
+        setIsSlowConvertingMessage(true);
+      }, 5000);
+
+      const convertedAvatar = await convertHeicToJpeg(avatar);
+
+      setIsSlowConvertingMessage(false);
+      clearInterval(timerId);
+
+      setAvatar(convertedAvatar);
     } else {
       setAvatar(avatar);
     }
+    setIsConverting(false);
   }
 
   async function uploadAvatar() {
@@ -301,77 +327,121 @@ function ProfilePhotosShow({
           </div>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
-          {uploadProgress > 0 && uploadProgress < 100 && (
+          {isConverting ? (
             <>
-              <DialogHeader>
-                <DialogTitle>Загрузка</DialogTitle>
-              </DialogHeader>
-              <Progress value={uploadProgress} />
-            </>
-          )}
-          {(uploadProgress === 0 || uploadProgress === 100) && (
-            <>
-              <DialogHeader>
-                <DialogTitle>Фото профиля</DialogTitle>
-                <DialogDescription>
-                  Выберите и отредактируйте фото профиля. Не забудьте сохранить
-                  перед выходом
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-4">
-                <Dropzone
-                  onDrop={avatarDropped}
-                  noClick
-                  noKeyboard
-                  accept={{ "image/*": acceptedImages.map((ai) => `.${ai}`) }}
-                >
-                  {({ getRootProps, getInputProps }) => (
-                    <Label
-                      {...getRootProps()}
-                      htmlFor="profileUploader"
-                      className="cursor-pointer border-2 p-10 text-center"
-                    >
-                      Нажмите или перенесите фото
-                      <Input
-                        {...getInputProps()}
-                        id="profileUploader"
-                        type="file"
-                      />
-                    </Label>
-                  )}
-                </Dropzone>
-                {avatar && (
-                  <div className="flex flex-col gap-4">
-                    <AvatarEditor
-                      ref={avatarEditor}
-                      image={avatar}
-                      width={250}
-                      height={250}
-                      border={50}
-                      color={[255, 255, 255, 0.6]}
-                      scale={scale}
-                      rotate={0}
-                      borderRadius={125}
-                    />
-                    <Slider
-                      onValueChange={(value) => setScale(value[0] ?? 1)}
-                      defaultValue={[scale]}
-                      min={1}
-                      max={2}
-                      step={0.05}
-                    />
-                  </div>
-                )}
+              <div className="flex justify-center gap-2">
+                <p>Конвертация heic</p>
+                <Loader className="h-5 w-5" />
               </div>
-              {avatar && (
-                <DialogFooter>
-                  <Button onClick={uploadAvatar}>Сохранить</Button>
-                </DialogFooter>
+              {isSlowConvertingMessage && (
+                <p>
+                  Это может занять продолжительное время на некоторых
+                  устройствах
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              {uploadProgress > 0 && uploadProgress < 100 && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Загрузка</DialogTitle>
+                  </DialogHeader>
+                  <Progress value={uploadProgress} />
+                </>
+              )}
+              {(uploadProgress === 0 || uploadProgress === 100) && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Фото профиля</DialogTitle>
+                    <DialogDescription>
+                      Выберите и отредактируйте фото профиля. Не забудьте
+                      сохранить перед выходом
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-col gap-4">
+                    <Dropzone
+                      onDrop={avatarDropped}
+                      noClick
+                      noKeyboard
+                      accept={{
+                        "image/*": acceptedImages.map((ai) => `.${ai}`),
+                      }}
+                    >
+                      {({ getRootProps, getInputProps }) => (
+                        <Label
+                          {...getRootProps()}
+                          htmlFor="profileUploader"
+                          className="cursor-pointer border-2 p-10 text-center"
+                        >
+                          Нажмите или перенесите фото
+                          <Input
+                            {...getInputProps()}
+                            id="profileUploader"
+                            type="file"
+                          />
+                        </Label>
+                      )}
+                    </Dropzone>
+                    {avatar && (
+                      <AvatarEditorBlock
+                        avatarEditor={avatarEditor}
+                        avatar={avatar}
+                        scale={scale}
+                        setScale={setScale}
+                        width={editorSize}
+                      />
+                    )}
+                  </div>
+                  {avatar && (
+                    <DialogFooter>
+                      <Button onClick={uploadAvatar}>Сохранить</Button>
+                    </DialogFooter>
+                  )}
+                </>
               )}
             </>
           )}
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function AvatarEditorBlock({
+  avatarEditor,
+  avatar,
+  scale,
+  setScale,
+  width,
+}: {
+  avatarEditor: React.RefObject<AvatarEditor>;
+  avatar: File;
+  scale: number;
+  setScale: (scale: number) => void;
+  width?: number;
+}) {
+  return (
+    <div className="flex flex-col gap-4 items-center">
+      <AvatarEditor
+        ref={avatarEditor}
+        image={avatar}
+        width={width}
+        height={width}
+        border={50}
+        color={[255, 255, 255, 0.6]}
+        scale={scale}
+        rotate={0}
+        borderRadius={125}
+        className="max-w-full"
+      />
+      <Slider
+        onValueChange={(value) => setScale(value[0] ?? 1)}
+        defaultValue={[scale]}
+        min={1}
+        max={2}
+        step={0.05}
+      />
     </div>
   );
 }
