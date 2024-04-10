@@ -17,6 +17,7 @@ import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { unsetAnonCookies } from "@/server/api/middlewares/protectedMiddlewares";
+import { OpenApiMeta } from "trpc-openapi";
 
 /**
  * 1. CONTEXT
@@ -90,19 +91,22 @@ export async function createContextInner(opts?: CreateInnerContextOptions) {
  * errors on the backend.
  */
 
-const t = initTRPC.context<typeof createTRPCContext>().create({
-  transformer: superjson,
-  errorFormatter({ shape, error }) {
-    return {
-      ...shape,
-      data: {
-        ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
-      },
-    };
-  },
-});
+const t = initTRPC
+  .context<typeof createTRPCContext>()
+  .meta<OpenApiMeta>()
+  .create({
+    transformer: superjson,
+    errorFormatter({ shape, error }) {
+      return {
+        ...shape,
+        data: {
+          ...shape.data,
+          zodError:
+            error.cause instanceof ZodError ? error.cause.flatten() : null,
+        },
+      };
+    },
+  });
 
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
